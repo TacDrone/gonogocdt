@@ -119,7 +119,7 @@
         p, li, code, span, button { font-size: 1.25vw; }
         footer p { font-size: 0.8vw; }
         #mission-title, #decision-panel h3 { font-size: 1.7vw; }
-        #go-button, #no-go-button, .next-button, .restart-button { font-size: 2vw; padding: 1.2vw; }
+        #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 2vw; padding: 1.2vw; }
         #live-feed-content { font-size: 1.4vw; }
         #briefing-content { font-size: 1.3vw; }
         
@@ -130,16 +130,30 @@
             p, li, code, span, button { font-size: 2.2vh; }
             footer p { font-size: 1.4vh; }
             #mission-title, #decision-panel h3 { font-size: 3vh; }
-            #go-button, #no-go-button, .next-button, .restart-button { font-size: 3.5vh; padding: 2.2vh; }
+            #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 3.5vh; padding: 2.2vh; }
             #live-feed-content { font-size: 2.4vh; }
             #briefing-content { font-size: 2.3vh; }
+        }
+        
+        #splash-screen {
+            background: #0f172a;
+            z-index: 20;
         }
 
     </style>
 </head>
 <body>
     <div id="aspect-ratio-container">
-        <div id="mission-control-wrapper">
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="absolute inset-0 flex flex-col items-center justify-center">
+            <h1 class="font-orbitron font-bold text-sky-300 tracking-widest header-text animate-fade-in">MISSION CONTROL</h1>
+            <p class="text-sky-500 mt-1 animate-fade-in" style="animation-delay: 0.2s;">Presented by Department of Physics | CRMA</p>
+            <button id="start-sim-button" class="decision-button mt-12 bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in" style="animation-delay: 0.4s;">
+                BEGIN SIMULATION
+            </button>
+        </div>
+
+        <div id="mission-control-wrapper" class="hidden">
             <div id="mission-control-ui" class="w-full h-full flex flex-col">
                 <header class="text-center mb-4">
                     <h1 class="font-orbitron font-bold text-sky-300 tracking-widest header-text">MISSION CONTROL</h1>
@@ -282,80 +296,65 @@
         const briefingContentEl = document.getElementById('briefing-content');
         const liveFeedContentEl = document.getElementById('live-feed-content');
         const decisionPanelEl = document.getElementById('decision-panel');
+        const missionControlWrapper = document.getElementById('mission-control-wrapper');
+        const splashScreen = document.getElementById('splash-screen');
         
-        const audioAmbient = document.getElementById('audio-ambient');
-        const audioTyping = document.getElementById('audio-typing');
-        const audioClick = document.getElementById('audio-click');
-        const audioCorrect = document.getElementById('audio-correct');
-        const audioIncorrect = document.getElementById('audio-incorrect');
+        // Audio Elements
+        const audioElements = {
+            ambient: document.getElementById('audio-ambient'),
+            typing: document.getElementById('audio-typing'),
+            click: document.getElementById('audio-click'),
+            correct: document.getElementById('audio-correct'),
+            incorrect: document.getElementById('audio-incorrect')
+        };
+        
+        let audioContextStarted = false;
 
-        let audioStarted = false;
-
-        function playSound(soundElement, loop = false) {
-            if (audioStarted && soundElement) {
-                soundElement.currentTime = 0;
-                soundElement.loop = loop;
-                soundElement.play().catch(e => console.error(`Audio play failed: ${e.message}`));
+        function playSound(soundKey, loop = false) {
+            if (audioContextStarted && audioElements[soundKey]) {
+                const sound = audioElements[soundKey];
+                sound.currentTime = 0;
+                sound.loop = loop;
+                sound.play().catch(e => console.error(`Audio play failed for ${soundKey}: ${e.message}`));
             }
         }
         
-        function stopSound(soundElement) {
-            if (soundElement) {
-                soundElement.pause();
-                soundElement.currentTime = 0;
+        function stopSound(soundKey) {
+            if (audioElements[soundKey]) {
+                const sound = audioElements[soundKey];
+                sound.pause();
+                sound.currentTime = 0;
             }
         }
         
-        document.body.addEventListener('click', () => {
-            if (!audioStarted) {
-                audioAmbient.volume = 0.05;
-                playSound(audioAmbient, true);
-                audioStarted = true;
-            }
-        }, { once: true });
-
+        function initAudio() {
+            if (audioContextStarted) return;
+            audioContextStarted = true;
+            audioElements.ambient.volume = 0.05;
+            playSound('ambient', true);
+        }
 
         function typeBriefing(s, callback) {
             briefingContentEl.innerHTML = ''; 
             
             const contentStructure = [
-                {
-                    title: 'OBJECTIVE:',
-                    text: s.objective,
-                    color: 'text-amber-400',
-                },
-                {
-                    title: 'URGENCY:',
-                    text: `"${s.urgency}"`,
-                    color: 'text-amber-300',
-                    italic: true
-                },
-                {
-                    title: 'WEATHER DATA:',
-                    text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`,
-                    color: 'text-cyan-400',
-                },
-                {
-                    title: 'TAF (Terminal Aerodrome Forecast):',
-                    text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`,
-                    color: 'text-cyan-400',
-                    isCode: true
-                }
+                { title: 'OBJECTIVE:', text: s.objective, color: 'text-amber-400' },
+                { title: 'URGENCY:', text: `"${s.urgency}"`, color: 'text-amber-300', italic: true },
+                { title: 'WEATHER DATA:', text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`, color: 'text-cyan-400' },
+                { title: 'TAF (Terminal Aerodrome Forecast):', text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`, color: 'text-cyan-400', isCode: true }
             ];
             
-            let charIndex = 0;
-            let currentItem = 0;
-            let currentElement;
+            let currentItemIndex = 0;
             
-            playSound(audioTyping, true);
+            playSound('typing', true);
 
-            function createNextElement() {
-                if (currentItem >= contentStructure.length) {
-                    stopSound(audioTyping);
+            function showNextItem() {
+                if (currentItemIndex >= contentStructure.length) {
+                    stopSound('typing');
                     if (callback) callback();
                     return;
                 }
-                const item = contentStructure[currentItem];
+                const item = contentStructure[currentItemIndex];
                 const wrapper = document.createElement('div');
                 wrapper.className = 'animate-text-focus-in';
                 
@@ -364,35 +363,19 @@
                 titleEl.textContent = item.title;
                 
                 const textEl = document.createElement(item.isCode ? 'pre' : 'p');
-                if(item.isCode) {
-                    textEl.className = 'bg-black/50 p-2 rounded-md font-mono text-lg'
-                } else {
-                    textEl.className = `text-slate-300 pl-4 ${item.italic ? 'italic' : ''}`;
-                }
+                textEl.className = item.isCode ? 'bg-black/50 p-2 rounded-md font-mono text-lg' : `text-slate-300 pl-4 ${item.italic ? 'italic' : ''}`;
                 textEl.style.whiteSpace = 'pre-wrap';
+                textEl.textContent = item.text;
 
                 wrapper.appendChild(titleEl);
                 wrapper.appendChild(textEl);
                 briefingContentEl.appendChild(wrapper);
 
-                currentElement = textEl;
-                charIndex = 0;
-                typeCharacter();
+                currentItemIndex++;
+                setTimeout(showNextItem, 800);
             }
 
-            function typeCharacter() {
-                const item = contentStructure[currentItem];
-                if (charIndex < item.text.length) {
-                    currentElement.textContent += item.text.charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeCharacter, 15);
-                } else {
-                    currentItem++;
-                    setTimeout(createNextElement, 300);
-                }
-            }
-
-            createNextElement();
+            showNextItem();
         }
 
         function loadScenario(index) {
@@ -403,7 +386,6 @@
             }
 
             const s = scenarios[index];
-            
             missionTitleEl.textContent = s.title;
             
             typeBriefing(s, () => {
@@ -430,7 +412,7 @@
         }
         
         function handleDecision(choice) {
-            playSound(audioClick);
+            playSound('click');
             const s = scenarios[currentScenarioIndex];
             const isCorrect = (choice === s.correctChoice);
 
@@ -438,18 +420,17 @@
             
             const resultTitle = document.createElement('h3');
             resultTitle.className = 'font-orbitron mb-3 text-2xl animate-text-focus-in';
-
             const explanationP = document.createElement('p');
             explanationP.className = 'explanation-text';
 
             if (isCorrect) {
-                playSound(audioCorrect);
+                playSound('correct');
                 missionControlUI.classList.add('decision-correct');
                 resultTitle.className += ' text-green-400';
                 resultTitle.textContent = 'การตัดสินใจถูกต้อง (CORRECT DECISION)';
                 explanationP.className += ' text-slate-200';
             } else {
-                playSound(audioIncorrect);
+                playSound('incorrect');
                 missionControlUI.classList.add('decision-incorrect');
                 resultTitle.className += ' text-red-400';
                 resultTitle.textContent = 'การตัดสินใจผิดพลาด (INCORRECT DECISION)';
@@ -464,7 +445,7 @@
             nextButton.innerText = 'NEXT MISSION BRIEFING';
             nextButton.className = 'next-button decision-button mt-6 w-full bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
             nextButton.onclick = () => {
-                playSound(audioClick);
+                playSound('click');
                 currentScenarioIndex++;
                 loadScenario(currentScenarioIndex);
             };
@@ -474,7 +455,7 @@
         }
 
         function showFinalScreen() {
-             playSound(audioCorrect);
+             playSound('correct');
              missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
              missionTitleEl.textContent = "All Missions Completed";
              briefingContentEl.innerHTML = '<p class="text-2xl animate-text-focus-in">All assigned tasks for this session have been concluded. Well done, Commander.</p>';
@@ -484,7 +465,7 @@
              restartButton.innerText = 'RESTART SIMULATION';
              restartButton.className = 'restart-button decision-button mt-6 w-full bg-amber-600/80 hover:bg-amber-500 border-amber-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
              restartButton.onclick = () => {
-                 playSound(audioClick);
+                 playSound('click');
                  currentScenarioIndex = 0;
                  loadScenario(currentScenarioIndex);
              };
@@ -492,8 +473,16 @@
              decisionPanelEl.appendChild(restartButton);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadScenario(currentScenarioIndex);
+        document.getElementById('start-sim-button').addEventListener('click', () => {
+            initAudio();
+            playSound('click');
+            splashScreen.classList.add('animate-fade-out', 'opacity-0');
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                missionControlWrapper.classList.remove('hidden');
+                missionControlWrapper.classList.add('animate-fade-in');
+                loadScenario(currentScenarioIndex);
+            }, 500);
         });
     </script>
 </body>
