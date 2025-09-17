@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ศูนย์บัญชาการภารกิจโดรน</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -27,7 +28,7 @@
         
         #aspect-ratio-container {
             position: relative;
-            width: 100vw; 
+            width: 100vw;
             height: 56.25vw; /* 16:9 aspect ratio */
             max-height: 100vh;
             max-width: 177.78vh; /* 16:9 aspect ratio */
@@ -215,14 +216,25 @@
         </div>
     </div>
     
-    <!-- Audio Elements -->
-    <audio id="audio-typing" loop src="data:audio/wav;base64,UklGRlAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQgAAAEBAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoaGRcWFRQTExIREA8ODQwLCQoICQcGBQQDAgEAAAAAAAAAAAAA"></audio>
-    <audio id="audio-click" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhSAAAAEBAAD8/Pj49PTw7Ojk4NzY1NDMyMTAvLi0sKikoJyYlJCMiISAfHh0cGxoaGRcWFRQTExIREA8ODQwLCQoICAcGBQQDAgEAAAAAAAAAAAA="></audio>
-    <audio id="audio-correct" src="data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQAAAAExBTkRNR0xJU1QAAAAAAAAAAAAAAAD//wIA/f/5//z/+v/5//j/9v/z//L/8//1//b/9//6//z//v8A"></audio>
-    <audio id="audio-incorrect" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAIARKwAAIhYAQAEABAAZGF0YUgAAAB AQD8AP4A/AD8APwA/AD8APwA/AD8APwA/AD8APwA/AD+AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AA=="></audio>
-
-
     <script>
+        // --- Audio Setup using Howler.js ---
+        const sounds = {
+            typing: new Howl({
+                src: ['data:audio/wav;base64,UklGRlAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQgAAAEBAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoaGRcWFRQTExIREA8ODQwLCQoICQcGBQQDAgEAAAAAAAAAAAAA'],
+                loop: true,
+                volume: 0.5
+            }),
+            click: new Howl({
+                src: ['data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhSAAAAEBAAD8/Pj49PTw7Ojk4NzY1NDMyMTAvLi0sKikoJyYlJCMiISAfHh0cGxoaGRcWFRQTExIREA8ODQwLCQoICAcGBQQDAgEAAAAAAAAAAAA=']
+            }),
+            correct: new Howl({
+                src: ['data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQAAAAExBTkRNR0xJU1QAAAAAAAAAAAAAAAD//wIA/f/5//z/+v/5//j/9v/z//L/8//1//b/9//6//z//v8A']
+            }),
+            incorrect: new Howl({
+                src: ['data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAIARKwAAIhYAQAEABAAZGF0YUgAAAB AQD8AP4A/AD8APwA/AD8APwA/AD8APwA/AD8APwA/AD+AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AA==']
+            })
+        };
+
         const scenarios = [
              {
                 title: 'ภารกิจที่ 1: สำรวจพื้นที่การเกษตร',
@@ -318,7 +330,7 @@
                 urgency: 'ผู้สูญหายขาดการติดต่อเกิน 12 ชั่วโมง อุณหภูมิตอนกลางคืนลดต่ำลง',
                 weather: { temp: '16°C', wind: 'ลมสงบ (ระดับ 0)', sighting: 'ท้องฟ้าเปิด มีความชื้นสูง แบตเตอรี่สำรองอุ่นไว้พร้อมใช้งาน', taf_code: 'TAF VTCC 171300Z 1714/1802 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศจะโปร่งตลอดคืน)' },
                 correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **การเตรียมความพร้อม:** การวอร์มแบตเตอรี่ (Pre-heating) จะช่วยลดความเสี่ยงจากอากาศเย็นได้\n* **ความเสถียร:** โดรน 6 ใบพัดมีความเสถียรและ отказоустойчивость (redundancy) สูง เหมาะสำหรับภารกิจสำคัญเช่นนี้'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **การเตรียมความพร้อม:** การวอร์มแบตเตอรี่ (Pre-heating) จะช่วยลดความเสี่ยงจากอากาศเย็นได้\n* **ความเสถยร:** โดรน 6 ใบพัดมีความเสถียรและ отказоустойчивость (redundancy) สูง เหมาะสำหรับภารกิจสำคัญเช่นนี้'
             },
             {
                 title: 'ภารกิจที่ 13: ถ่ายทำภาพยนตร์',
@@ -396,56 +408,11 @@
         const missionControlWrapper = document.getElementById('mission-control-wrapper');
         const splashScreen = document.getElementById('splash-screen');
         
-        const audioElements = {
-            typing: document.getElementById('audio-typing'),
-            correct: document.getElementById('audio-correct'),
-            incorrect: document.getElementById('audio-incorrect'),
-            click: document.getElementById('audio-click')
-        };
-        let audioContextStarted = false;
-
-        function playSound(soundKey, loop = false) {
-            if (!audioContextStarted || !audioElements[soundKey]) return;
-            const sound = audioElements[soundKey];
-            sound.currentTime = 0;
-            sound.loop = loop;
-            sound.play().catch(e => console.error(`Audio play failed for ${soundKey}: ${e.message}`));
-        }
-
-        function stopSound(soundKey) {
-            if (audioElements[soundKey]) {
-                audioElements[soundKey].pause();
-                audioElements[soundKey].currentTime = 0;
-            }
-        }
-
-        function initAudio() {
-            if (audioContextStarted) return;
-            try {
-                // A robust way to unlock audio context in most browsers.
-                for (const key in audioElements) {
-                    const sound = audioElements[key];
-                    sound.volume = 0; // Mute it temporarily to avoid a sound blip.
-                    sound.play();
-                    sound.pause();
-                    sound.currentTime = 0;
-                    sound.volume = 1; // Unmute and set back to full volume.
-                }
-                audioElements.typing.volume = 0.5; // Set specific volume for typing sound
-                audioContextStarted = true;
-                console.log("Audio context initialized successfully.");
-            } catch (error) {
-                console.error("Could not initialize audio context:", error);
-                // Even if it fails, we set the flag to true to allow future attempts to play sound.
-                audioContextStarted = true; 
-            }
-        }
-
         function typeWriter(element, text, speed, callback) {
             let i = 0;
             element.innerHTML = '';
             element.classList.add('typing-cursor');
-            playSound('typing', true);
+            sounds.typing.play();
 
             function type() {
                 if (i < text.length) {
@@ -454,7 +421,7 @@
                     setTimeout(type, speed);
                 } else {
                     element.classList.remove('typing-cursor');
-                    stopSound('typing');
+                    sounds.typing.stop();
                     if (callback) callback();
                 }
             }
@@ -462,7 +429,7 @@
         }
 
         function showBriefing(s, callback) {
-            briefingContentEl.innerHTML = ''; 
+            briefingContentEl.innerHTML = '';
             
             const contentStructure = [
                 { title: 'OBJECTIVE:', text: s.objective, color: 'text-amber-400' },
@@ -538,7 +505,7 @@
         }
         
         function handleDecision(choice) {
-            playSound('click');
+            sounds.click.play();
             const s = scenarios[currentScenarioIndex];
             const isCorrect = (choice === s.correctChoice);
 
@@ -550,7 +517,7 @@
             explanationP.style.whiteSpace = 'pre-wrap';
 
             if (isCorrect) {
-                playSound('correct');
+                sounds.correct.play();
                 missionControlUI.classList.add('decision-correct');
                 resultTitle.className += ' text-green-400';
                 explanationP.className += ' text-slate-200';
@@ -558,7 +525,7 @@
                     typeWriter(explanationP, s.explanation, 20);
                 });
             } else {
-                playSound('incorrect');
+                sounds.incorrect.play();
                 missionControlUI.classList.add('decision-incorrect');
                 resultTitle.className += ' text-white';
                 explanationP.className += ' text-white';
@@ -574,7 +541,7 @@
             nextButton.innerText = 'NEXT MISSION BRIEFING';
             nextButton.className = 'next-button decision-button mt-6 w-full bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
             nextButton.onclick = () => {
-                playSound('click');
+                sounds.click.play();
                 currentScenarioIndex++;
                 loadScenario(currentScenarioIndex);
             };
@@ -586,7 +553,7 @@
         }
 
         function showFinalScreen() {
-             playSound('correct');
+             sounds.correct.play();
              missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
              missionTitleEl.textContent = "All Missions Completed";
 
@@ -606,7 +573,7 @@
              restartButton.innerText = 'RESTART SIMULATION';
              restartButton.className = 'restart-button decision-button mt-6 w-full bg-amber-600/80 hover:bg-amber-500 border-amber-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
              restartButton.onclick = () => {
-                 playSound('click');
+                 sounds.click.play();
                  currentScenarioIndex = 0;
                  loadScenario(currentScenarioIndex);
              };
@@ -615,8 +582,15 @@
         }
 
         document.getElementById('start-sim-button').addEventListener('click', () => {
-            initAudio();
-            playSound('click');
+            if (Howler.ctx.state !== 'running') {
+                Howler.ctx.resume().then(() => {
+                    console.log("Audio context resumed successfully!");
+                    sounds.click.play();
+                });
+            } else {
+                sounds.click.play();
+            }
+            
             splashScreen.classList.add('animate-fade-out');
             setTimeout(() => {
                 splashScreen.classList.add('hidden');
@@ -628,3 +602,5 @@
     </script>
 </body>
 </html>
+
+
