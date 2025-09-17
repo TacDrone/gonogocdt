@@ -76,9 +76,14 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .animate-fade-in { animation: fadeIn 0.7s ease-in-out; }
+        .animate-fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
         
         .animate-text-focus-in {
@@ -199,11 +204,11 @@
     </div>
     
     <!-- Audio Elements -->
-    <audio id="audio-ambient" loop src="https://cdn.pixabay.com/audio/2022/10/13/audio_790183e29c.mp3"></audio>
-    <audio id="audio-typing" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c816397354.mp3"></audio>
-    <audio id="audio-click" src="https://cdn.pixabay.com/audio/2022/03/15/audio_28b1b22880.mp3"></audio>
-    <audio id="audio-correct" src="https://cdn.pixabay.com/audio/2022/03/10/audio_2c8422312a.mp3"></audio>
-    <audio id="audio-incorrect" src="https://cdn.pixabay.com/audio/2022/03/10/audio_9da562a9b3.mp3"></audio>
+    <audio id="audio-ambient" loop src="data:audio/wav;base64,UklGRqIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhZIgAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA=="></audio>
+    <audio id="audio-typing" src="data:audio/wav;base64,UklGRlAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQgAAAEBAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoaGRcWFRQTExIREA8ODQwLCQoICQcGBQQDAgEAAAAAAAAAAAAA"></audio>
+    <audio id="audio-click" src="data:audio/wav;base64,UklGRlgAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhSAAAAE42Pj8+Pz06Nzc2NTMyMjExLCwrKSgoJychIR8eHRvb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29v/"></audio>
+    <audio id="audio-correct" src="data:audio/wav;base64,UklGRkQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="></audio>
+    <audio id="audio-incorrect" src="data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhQgAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="></audio>
 
     <script>
         const scenarios = [
@@ -299,7 +304,6 @@
         const missionControlWrapper = document.getElementById('mission-control-wrapper');
         const splashScreen = document.getElementById('splash-screen');
         
-        // Audio Elements
         const audioElements = {
             ambient: document.getElementById('audio-ambient'),
             typing: document.getElementById('audio-typing'),
@@ -311,12 +315,11 @@
         let audioContextStarted = false;
 
         function playSound(soundKey, loop = false) {
-            if (audioContextStarted && audioElements[soundKey]) {
-                const sound = audioElements[soundKey];
-                sound.currentTime = 0;
-                sound.loop = loop;
-                sound.play().catch(e => console.error(`Audio play failed for ${soundKey}: ${e.message}`));
-            }
+            if (!audioContextStarted || !audioElements[soundKey]) return;
+            const sound = audioElements[soundKey];
+            sound.currentTime = 0;
+            sound.loop = loop;
+            sound.play().catch(e => console.error(`Audio play failed for ${soundKey}: ${e.message}`));
         }
         
         function stopSound(soundKey) {
@@ -330,11 +333,12 @@
         function initAudio() {
             if (audioContextStarted) return;
             audioContextStarted = true;
-            audioElements.ambient.volume = 0.05;
+            audioElements.ambient.volume = 0.1;
+            audioElements.typing.volume = 0.5;
             playSound('ambient', true);
         }
 
-        function typeBriefing(s, callback) {
+        function showBriefing(s, callback) {
             briefingContentEl.innerHTML = ''; 
             
             const contentStructure = [
@@ -388,7 +392,7 @@
             const s = scenarios[index];
             missionTitleEl.textContent = s.title;
             
-            typeBriefing(s, () => {
+            showBriefing(s, () => {
                 decisionPanelEl.style.visibility = 'visible';
                 decisionPanelEl.classList.add('animate-fade-in');
             });
@@ -419,9 +423,9 @@
             liveFeedContentEl.innerHTML = '';
             
             const resultTitle = document.createElement('h3');
-            resultTitle.className = 'font-orbitron mb-3 text-2xl animate-text-focus-in';
+            resultTitle.className = 'font-orbitron mb-3 text-2xl animate-fade-in';
             const explanationP = document.createElement('p');
-            explanationP.className = 'explanation-text';
+            explanationP.className = 'animate-fade-in';
 
             if (isCorrect) {
                 playSound('correct');
@@ -458,8 +462,8 @@
              playSound('correct');
              missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
              missionTitleEl.textContent = "All Missions Completed";
-             briefingContentEl.innerHTML = '<p class="text-2xl animate-text-focus-in">All assigned tasks for this session have been concluded. Well done, Commander.</p>';
-             liveFeedContentEl.innerHTML = '<p class="font-mono text-2xl text-sky-400 animate-text-focus-in">System Standby. Awaiting new directives.</p>';
+             briefingContentEl.innerHTML = '<p class="text-2xl animate-fade-in">All assigned tasks for this session have been concluded. Well done, Commander.</p>';
+             liveFeedContentEl.innerHTML = '<p class="font-mono text-2xl text-sky-400 animate-fade-in">System Standby. Awaiting new directives.</p>';
              
              const restartButton = document.createElement('button');
              restartButton.innerText = 'RESTART SIMULATION';
@@ -476,7 +480,7 @@
         document.getElementById('start-sim-button').addEventListener('click', () => {
             initAudio();
             playSound('click');
-            splashScreen.classList.add('animate-fade-out', 'opacity-0');
+            splashScreen.classList.add('animate-fade-out');
             setTimeout(() => {
                 splashScreen.classList.add('hidden');
                 missionControlWrapper.classList.remove('hidden');
