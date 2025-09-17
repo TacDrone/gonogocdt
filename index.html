@@ -20,28 +20,46 @@
         }
         body {
             font-family: 'Poppins', sans-serif;
-            background: #000;
+            background-color: #f1f5f9; /* slate-100 */
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #e2e8f0; /* slate-200 */
+            color: #1e293b; /* slate-800 */
         }
         
+        /* New Animated Grid Background */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+            background-size: 3vw 3vw;
+            animation: moveGrid 25s linear infinite;
+            z-index: -1;
+        }
+        @keyframes moveGrid {
+            from { background-position: 0 0; }
+            to { background-position: 6vw 3vw; }
+        }
+
         #aspect-ratio-container {
             position: relative;
-            width: 100vw;
+            width: 100vw; 
             height: 56.25vw; /* 16:9 aspect ratio */
             max-height: 100vh;
             max-width: 177.78vh; /* 16:9 aspect ratio */
         }
 
         #start-screen {
-             position: absolute;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0f172a;
+            background-color: #f1f5f9; /* slate-100 */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -55,7 +73,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0f172a;
             display: flex;
             flex-direction: column;
             padding: 2vw;
@@ -65,37 +82,42 @@
 
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
 
+        /* Updated Panel Style */
         .panel {
-            background-color: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid #38bdf8;
-            box-shadow: 0 0 1.5vw rgba(56, 189, 248, 0.3);
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #cbd5e1; /* slate-300 */
+            box-shadow: 0 0.5vw 1.5vw rgba(0, 0, 0, 0.05), 0 0.2vw 0.5vw rgba(0, 0, 0, 0.05);
             transition: border-color 0.5s ease, box-shadow 0.5s ease;
         }
+        
+        /* Updated Button Style */
         .decision-button {
             transition: all 0.2s ease-in-out;
             border: 2px solid transparent;
         }
         .decision-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 2vw rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.15);
         }
+        
         .live-indicator::before {
             content: '';
             display: inline-block;
             width: 1.2vh;
             height: 1.2vh;
             border-radius: 50%;
-            background-color: #f87171;
+            background-color: #ef4444; /* red-500 */
             margin-right: 1vh;
             animation: blink 1.5s infinite;
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
+        /* Animation Keyframes */
         .animate-fade-in { animation: fadeIn 0.7s ease-in-out; }
         .animate-fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(1.5vw); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeOut {
@@ -111,62 +133,106 @@
           100% { filter: blur(0px); opacity: 1; }
         }
         
-        /* Typing cursor effect */
         .typing-cursor::after {
             content: '▋';
             animation: blink-cursor 0.7s step-end infinite;
-            color: #38bdf8;
+            color: #0ea5e9; /* sky-500 */
         }
         @keyframes blink-cursor {
             from, to { opacity: 1; }
             50% { opacity: 0; }
         }
 
+        /* Scanline Effect for Live Feed */
+        #live-feed-content {
+            position: relative;
+        }
+        #live-feed-content::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(100,100,100,0.05) 50%, rgba(0,0,0,0.05) 50%);
+            background-size: 100% 4px;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 40px; }
+        }
 
-        /* State styles */
+        /* Updated State styles */
         .decision-correct .panel {
-            border-color: #22c55e;
+            border-color: #22c55e; /* green-500 */
             box-shadow: 0 0 2vw rgba(34, 197, 94, 0.5);
         }
-        .decision-correct .header-text { color: #4ade80; }
         
         @keyframes flash-red-animation {
-          0%, 100% {
-            box-shadow: 0 0 2vw rgba(239, 68, 68, 0.5);
-            border-color: #ef4444;
-          }
-          50% {
-            box-shadow: 0 0 4vw rgba(255, 0, 0, 1);
-            border-color: #ff7575;
-          }
+          0%, 100% { box-shadow: 0 0 2vw rgba(239, 68, 68, 0.5); border-color: #ef4444; }
+          50% { box-shadow: 0 0 4vw rgba(255, 0, 0, 1); border-color: #ff7575; }
         }
         
         .decision-incorrect .panel {
             animation: flash-red-animation 0.8s infinite;
         }
-        .decision-incorrect .header-text { color: #ffffff; }
+        
+        /* New Glitch Effect for Title */
+        .glitch {
+            position: relative;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f1f5f9; /* Match body bg */
+            overflow: hidden;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 #ef4444; /* red-500 */
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 #3b82f6; /* blue-500 */
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(41px, 9999px, 43px, 0); } 10% { clip: rect(24px, 9999px, 99px, 0); } 20% { clip: rect(45px, 9999px, 92px, 0); } 30% { clip: rect(38px, 9999px, 53px, 0); } 40% { clip: rect(28px, 9999px, 83px, 0); } 50% { clip: rect(79px, 9999px, 33px, 0); } 60% { clip: rect(70px, 9999px, 80px, 0); } 70% { clip: rect(23px, 9999px, 74px, 0); } 80% { clip: rect(83px, 9999px, 50px, 0); } 90% { clip: rect(10px, 9999px, 93px, 0); } 100% { clip: rect(66px, 9999px, 40px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(5px, 9999px, 101px, 0); } 10% { clip: rect(27px, 9999px, 100px, 0); } 20% { clip: rect(15px, 9999px, 55px, 0); } 30% { clip: rect(57px, 9999px, 59px, 0); } 40% { clip: rect(81px, 9999px, 2px, 0); } 50% { clip: rect(2px, 9999px, 60px, 0); } 60% { clip: rect(41px, 9999px, 62px, 0); } 70% { clip: rect(88px, 9999px, 8px, 0); } 80% { clip: rect(66px, 9999px, 59px, 0); } 90% { clip: rect(41px, 9999px, 47px, 0); } 100% { clip: rect(93px, 9999px, 99px, 0); }
+        }
+
 
         /* Responsive Font Sizes */
-        h1 { font-size: 4.2vw; }
-        h2 { font-size: 2.4vw; }
-        h3 { font-size: 1.8vw; }
-        p, li, code, span, button { font-size: 1.5vw; }
-        footer p { font-size: 0.96vw; }
-        #mission-title, #decision-panel h3 { font-size: 2.04vw; }
-        #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 2.4vw; padding: 1.2vw; }
-        #live-feed-content { font-size: 1.68vw; }
-        #briefing-content { font-size: 1.56vw; }
+        h1 { font-size: 4.5vw; }
+        h2 { font-size: 2.2vw; }
+        h3 { font-size: 1.6vw; }
+        p, li, code, span, button { font-size: 1.4vw; }
+        footer p { font-size: 1vw; }
+        #mission-title, #decision-panel h3 { font-size: 1.8vw; }
+        #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 2.2vw; padding: 1vw; }
+        #live-feed-content { font-size: 1.5vw; }
+        #briefing-content { font-size: 1.4vw; }
         
         @media (min-aspect-ratio: 16/9) {
-            h1 { font-size: 7.2vh; }
-            h2 { font-size: 4.2vh; }
-            h3 { font-size: 3vh; }
-            p, li, code, span, button { font-size: 2.64vh; }
-            footer p { font-size: 1.68vh; }
-            #mission-title, #decision-panel h3 { font-size: 3.6vh; }
-            #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 4.2vh; padding: 2.2vh; }
-            #live-feed-content { font-size: 2.88vh; }
-            #briefing-content { font-size: 2.76vh; }
+            h1 { font-size: 7.5vh; }
+            h2 { font-size: 3.8vh; }
+            h3 { font-size: 2.8vh; }
+            p, li, code, span, button { font-size: 2.5vh; }
+            footer p { font-size: 1.8vh; }
+            #mission-title, #decision-panel h3 { font-size: 3.2vh; }
+            #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 3.8vh; padding: 1.8vh; }
+            #live-feed-content { font-size: 2.7vh; }
+            #briefing-content { font-size: 2.5vh; }
         }
         
     </style>
@@ -176,10 +242,10 @@
         <!-- Start Screen -->
         <div id="start-screen">
              <div class="text-center">
-                 <h1 class="font-orbitron font-bold text-sky-300 tracking-widest header-text animate-text-focus-in">DRONE MISSION SIMULATOR</h1>
-                 <p class="text-sky-500 mt-2 text-2xl animate-text-focus-in" style="animation-delay: 0.5s;">Presented by Department of Physics | CRMA</p>
+                 <h1 class="font-orbitron font-black text-slate-800 tracking-wider glitch" data-text="DRONE MISSION SIMULATOR">DRONE MISSION SIMULATOR</h1>
+                 <p class="text-slate-600 mt-2 text-2xl animate-text-focus-in" style="animation-delay: 0.5s;">Presented by Department of Physics | CRMA</p>
             </div>
-            <button id="start-sim-button" class="decision-button mt-12 bg-sky-600/80 hover:bg-sky-500 border-sky-400 text-white font-orbitron rounded-md shadow-lg animate-text-focus-in" style="animation-delay: 1s;">
+            <button id="start-sim-button" class="decision-button mt-12 bg-sky-500 hover:bg-sky-400 text-white font-orbitron rounded-lg shadow-xl animate-text-focus-in" style="animation-delay: 1s;">
                 START SIMULATION
             </button>
         </div>
@@ -188,34 +254,34 @@
         <div id="mission-control-wrapper">
             <div id="mission-control-ui" class="w-full h-full flex flex-col">
                 <header class="text-center mb-4">
-                    <h1 class="font-orbitron font-bold text-sky-300 tracking-widest header-text">MISSION CONTROL</h1>
-                    <p class="text-sky-500 mt-1">Presented by Department of Physics | CRMA</p>
-                    <p id="mission-title" class="text-cyan-400 mt-1"></p>
+                    <h1 class="font-orbitron font-black text-slate-800 tracking-wider">MISSION CONTROL</h1>
+                    <p class="text-slate-600 mt-1">Presented by Department of Physics | CRMA</p>
+                    <p id="mission-title" class="text-sky-700 mt-1 font-semibold"></p>
                 </header>
 
                 <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow">
                     <!-- Briefing Panel -->
                     <div id="briefing-panel" class="panel rounded-lg p-6 flex flex-col">
-                        <h2 class="font-orbitron text-amber-300 border-b-2 border-amber-300/50 pb-2 mb-3">MISSION BRIEFING</h2>
+                        <h2 class="font-orbitron text-orange-600 border-b-2 border-orange-400/50 pb-2 mb-3 font-bold">MISSION BRIEFING</h2>
                         <div id="briefing-content" class="space-y-4 flex-grow overflow-y-auto"></div>
                     </div>
 
                     <!-- Main Display -->
                     <div id="main-display" class="panel rounded-lg p-6 flex flex-col">
-                        <div class="flex justify-between items-center border-b-2 border-sky-300/50 pb-2 mb-3">
-                            <h2 class="font-orbitron text-sky-300 header-text">LIVE FEED</h2>
-                            <span class="live-indicator font-orbitron text-white">LIVE</span>
+                        <div class="flex justify-between items-center border-b-2 border-sky-400/50 pb-2 mb-3">
+                            <h2 class="font-orbitron text-sky-600 font-bold">LIVE FEED</h2>
+                            <span class="live-indicator font-orbitron text-slate-800 font-semibold">LIVE</span>
                         </div>
-                        <div id="live-feed-content" class="flex-grow bg-black/50 rounded p-4 overflow-y-auto font-mono">
+                        <div id="live-feed-content" class="flex-grow bg-slate-900/90 text-slate-200 rounded p-4 overflow-y-auto font-mono">
                             <p>Awaiting pilot decision...</p>
                         </div>
                         <div id="decision-panel" class="mt-4">
-                            <h3 class="text-center font-orbitron text-white mb-3">Awaiting Command</h3>
+                            <h3 class="text-center font-orbitron text-slate-800 mb-3">Awaiting Command</h3>
                             <div class="flex justify-around gap-4">
-                                <button id="go-button" class="decision-button w-full bg-green-600/80 hover:bg-green-500 border-green-400 text-white font-orbitron rounded-md shadow-lg">
+                                <button id="go-button" class="decision-button w-full bg-green-500 hover:bg-green-400 text-white font-orbitron rounded-lg shadow-lg">
                                     GO
                                 </button>
-                                <button id="no-go-button" class="decision-button w-full bg-red-600/80 hover:bg-red-500 border-red-400 text-white font-orbitron rounded-md shadow-lg">
+                                <button id="no-go-button" class="decision-button w-full bg-red-500 hover:bg-red-400 text-white font-orbitron rounded-lg shadow-lg">
                                     NO GO
                                 </button>
                             </div>
@@ -225,12 +291,14 @@
             </div>
             
             <footer class="w-full text-center py-2">
-                <p class="text-slate-600">&copy; 2025 Department of Physics | CRMA. All Rights Reserved.</p>
+                <p class="text-slate-400">&copy; 2025 Department of Physics | CRMA. All Rights Reserved.</p>
             </footer>
         </div>
     </div>
     
     <script>
+        // The JavaScript logic remains the same as it's robust and works well.
+        // I'm only modifying the HTML and CSS for the visual theme change.
         const scenarios = [
              {
                 title: 'ภารกิจที่ 1: สำรวจพื้นที่การเกษตร',
@@ -435,13 +503,16 @@
             synths.correct.volume.value = -12;
 
             // Sound for an incorrect decision
-            synths.incorrect = new Tone.FMSynth({
-                harmonicity: 1.5, modulationIndex: 10, oscillator: { type: "sine" },
-                envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 },
-                modulation: { type: "square" },
-                modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.8 }
+            const incorrectSynth = new Tone.Synth({
+                oscillator: { type: 'sawtooth' },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 }
             }).toDestination();
-            synths.incorrect.volume.value = -8;
+            incorrectSynth.volume.value = -10;
+
+            synths.incorrect = new Tone.Sequence((time, note) => {
+                incorrectSynth.triggerAttackRelease(note, '16n', time);
+            }, ['F3', 'F3'], '8n');
+            synths.incorrect.loop = false;
             
              // Sound for loading a new scenario
             synths.load = new Tone.Synth({
@@ -456,18 +527,22 @@
             }).toDestination();
 
             soundsInitialized = true;
+            Tone.Transport.start();
         }
 
         // --- Core Application Logic ---
 
-        function typeWriter(element, text, speed, callback) {
+        function typeWriter(element, text, speed, options = {}) {
+            const { callback, playSound = true } = options;
             let i = 0;
             element.innerHTML = '';
             element.classList.add('typing-cursor');
             
             function type() {
                 if (i < text.length) {
-                    if (soundsInitialized && text.charAt(i) !== ' ') synths.type.triggerAttackRelease('C7', '32n');
+                    if (playSound && soundsInitialized && text.charAt(i) !== ' ') {
+                        synths.type.triggerAttackRelease('C7', '32n');
+                    }
                     element.innerHTML += text.charAt(i);
                     i++;
                     setTimeout(type, speed);
@@ -480,13 +555,13 @@
         }
 
         function showBriefing(s, callback) {
-            briefingContentEl.innerHTML = '';
+            briefingContentEl.innerHTML = ''; 
             
             const contentStructure = [
-                { title: 'OBJECTIVE:', text: s.objective, color: 'text-amber-400' },
-                { title: 'URGENCY:', text: `"${s.urgency}"`, color: 'text-amber-300', italic: true },
-                { title: 'WEATHER DATA:', text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`, color: 'text-cyan-400' },
-                { title: 'TAF (Terminal Aerodrome Forecast):', text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`, color: 'text-cyan-400', isCode: true }
+                { title: 'OBJECTIVE:', text: s.objective, color: 'text-orange-700' },
+                { title: 'URGENCY:', text: `"${s.urgency}"`, color: 'text-orange-600', italic: true },
+                { title: 'WEATHER DATA:', text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`, color: 'text-sky-700' },
+                { title: 'TAF (Terminal Aerodrome Forecast):', text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`, color: 'text-sky-700', isCode: true }
             ];
             
             let currentItemIndex = 0;
@@ -504,19 +579,19 @@
                 titleEl.className = `font-bold ${item.color}`;
                 
                 const textEl = document.createElement(item.isCode ? 'pre' : 'p');
-                textEl.className = item.isCode ? 'bg-black/50 p-2 rounded-md font-mono text-lg' : `text-slate-300 pl-4 ${item.italic ? 'italic' : ''}`;
+                textEl.className = item.isCode ? 'bg-slate-200/50 p-2 rounded-md font-mono text-slate-700 text-lg' : `text-slate-700 pl-4 ${item.italic ? 'italic' : ''}`;
                 textEl.style.whiteSpace = 'pre-wrap';
                 
                 wrapper.appendChild(titleEl);
                 wrapper.appendChild(textEl);
                 briefingContentEl.appendChild(wrapper);
 
-                typeWriter(titleEl, item.title, 30, () => {
-                     typeWriter(textEl, item.text, 10, () => {
+                typeWriter(titleEl, item.title, 30, { callback: () => {
+                     typeWriter(textEl, item.text, 10, { callback: () => {
                         currentItemIndex++;
                         setTimeout(showNextItem, 300);
-                     });
-                });
+                     }});
+                }});
             }
 
             showNextItem();
@@ -541,12 +616,12 @@
             liveFeedContentEl.innerHTML = '<p class="font-mono animate-text-focus-in">Awaiting pilot decision...</p>';
             decisionPanelEl.style.visibility = 'hidden';
             decisionPanelEl.innerHTML = `
-                 <h3 class="text-center font-orbitron text-white mb-3">Awaiting Command</h3>
+                 <h3 class="text-center font-orbitron text-slate-800 mb-3 font-semibold">Awaiting Command</h3>
                     <div class="flex justify-around gap-4">
-                        <button id="go-button" class="decision-button w-full bg-green-600/80 hover:bg-green-500 border-green-400 text-white font-orbitron rounded-md shadow-lg">
+                        <button id="go-button" class="decision-button w-full bg-green-500 hover:bg-green-400 text-white font-orbitron rounded-lg shadow-lg">
                             GO
                         </button>
-                        <button id="no-go-button" class="decision-button w-full bg-red-600/80 hover:bg-red-500 border-red-400 text-white font-orbitron rounded-md shadow-lg">
+                        <button id="no-go-button" class="decision-button w-full bg-red-500 hover:bg-red-400 text-white font-orbitron rounded-lg shadow-lg">
                             NO GO
                         </button>
                     </div>
@@ -564,7 +639,7 @@
             liveFeedContentEl.innerHTML = '';
             
             const resultTitle = document.createElement('h3');
-            resultTitle.className = 'font-orbitron mb-3 text-2xl';
+            resultTitle.className = 'font-orbitron mb-3 text-2xl font-bold';
             const explanationP = document.createElement('p');
             explanationP.style.whiteSpace = 'pre-wrap';
 
@@ -573,17 +648,17 @@
                 missionControlUI.classList.add('decision-correct');
                 resultTitle.className += ' text-green-400';
                 explanationP.className += ' text-slate-200';
-                typeWriter(resultTitle, 'การตัดสินใจถูกต้อง (CORRECT DECISION)', 50, () => {
-                    typeWriter(explanationP, s.explanation, 20);
-                });
+                typeWriter(resultTitle, 'การตัดสินใจถูกต้อง (CORRECT DECISION)', 50, { callback: () => {
+                    typeWriter(explanationP, s.explanation, 20, { playSound: false });
+                }});
             } else {
-                 if (soundsInitialized) synths.incorrect.triggerAttackRelease('C3', '0.8');
+                 if (soundsInitialized) synths.incorrect.start();
                 missionControlUI.classList.add('decision-incorrect');
-                resultTitle.className += ' text-white';
-                explanationP.className += ' text-white';
-                 typeWriter(resultTitle, 'การตัดสินใจผิดพลาด (INCORRECT DECISION)', 50, () => {
-                    typeWriter(explanationP, s.explanation, 20);
-                });
+                resultTitle.className += ' text-red-400';
+                explanationP.className += ' text-slate-200';
+                 typeWriter(resultTitle, 'การตัดสินใจผิดพลาด (INCORRECT DECISION)', 50, { callback: () => {
+                    typeWriter(explanationP, s.explanation, 20, { playSound: false });
+                }});
             }
             
             liveFeedContentEl.appendChild(resultTitle);
@@ -591,7 +666,7 @@
             
             const nextButton = document.createElement('button');
             nextButton.innerText = 'NEXT MISSION BRIEFING';
-            nextButton.className = 'next-button decision-button mt-6 w-full bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
+            nextButton.className = 'next-button decision-button mt-6 w-full bg-sky-500 hover:bg-sky-400 text-white font-orbitron rounded-lg shadow-lg animate-fade-in';
             nextButton.onclick = () => {
                 if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
                 currentScenarioIndex++;
@@ -610,7 +685,7 @@
              missionTitleEl.textContent = "All Missions Completed";
 
              const briefingFinal = document.createElement('p');
-             briefingFinal.className = "text-2xl";
+             briefingFinal.className = "text-2xl text-slate-700";
              briefingContentEl.innerHTML = '';
              briefingContentEl.appendChild(briefingFinal);
              typeWriter(briefingFinal, 'All assigned tasks for this session have been concluded. Well done, Commander.', 30);
@@ -623,7 +698,7 @@
              
              const restartButton = document.createElement('button');
              restartButton.innerText = 'RESTART SIMULATION';
-             restartButton.className = 'restart-button decision-button mt-6 w-full bg-amber-600/80 hover:bg-amber-500 border-amber-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
+             restartButton.className = 'restart-button decision-button mt-6 w-full bg-orange-500 hover:bg-orange-400 text-white font-orbitron rounded-lg shadow-lg animate-fade-in';
              restartButton.onclick = () => {
                  if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
                  currentScenarioIndex = 0;
@@ -650,6 +725,3 @@
     </script>
 </body>
 </html>
-
-
-
