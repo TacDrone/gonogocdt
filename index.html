@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Import Tone.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         html, body {
             margin: 0;
@@ -33,6 +35,20 @@
             max-width: 177.78vh; /* 16:9 aspect ratio */
         }
 
+        #start-screen {
+             position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
         #mission-control-wrapper {
             position: absolute;
             top: 0;
@@ -44,6 +60,7 @@
             flex-direction: column;
             padding: 2vw;
             box-sizing: border-box;
+            display: none; /* Initially hidden */
         }
 
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
@@ -156,6 +173,18 @@
 </head>
 <body>
     <div id="aspect-ratio-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+             <div class="text-center">
+                 <h1 class="font-orbitron font-bold text-sky-300 tracking-widest header-text animate-text-focus-in">DRONE MISSION SIMULATOR</h1>
+                 <p class="text-sky-500 mt-2 text-2xl animate-text-focus-in" style="animation-delay: 0.5s;">Presented by Department of Physics | CRMA</p>
+            </div>
+            <button id="start-sim-button" class="decision-button mt-12 bg-sky-600/80 hover:bg-sky-500 border-sky-400 text-white font-orbitron rounded-md shadow-lg animate-text-focus-in" style="animation-delay: 1s;">
+                START SIMULATION
+            </button>
+        </div>
+
+        <!-- Main UI (initially hidden) -->
         <div id="mission-control-wrapper">
             <div id="mission-control-ui" class="w-full h-full flex flex-col">
                 <header class="text-center mb-4">
@@ -373,7 +402,64 @@
         const liveFeedContentEl = document.getElementById('live-feed-content');
         const decisionPanelEl = document.getElementById('decision-panel');
         const missionControlWrapper = document.getElementById('mission-control-wrapper');
-        
+        const startSimButton = document.getElementById('start-sim-button');
+        const startScreen = document.getElementById('start-screen');
+
+        // --- Sound Effect Setup using Tone.js ---
+        let soundsInitialized = false;
+        const synths = {};
+
+        function initSounds() {
+            if (soundsInitialized) return;
+            
+            // Sound for button clicks
+            synths.click = new Tone.MembraneSynth({
+                pitchDecay: 0.01, octaves: 3, oscillator: { type: 'sine' },
+                envelope: { attack: 0.001, decay: 0.2, sustain: 0.01, release: 0.3 }
+            }).toDestination();
+
+            // Sound for typewriter effect
+            synths.type = new Tone.FMSynth({
+                harmonicity: 8, modulationIndex: 2, oscillator: { type: 'sine' },
+                envelope: { attack: 0.001, decay: 0.1, sustain: 0.01, release: 0.1 },
+                modulation: { type: 'square' },
+                modulationEnvelope: { attack: 0.002, decay: 0.2, sustain: 0, release: 0.2 }
+            }).toDestination();
+            synths.type.volume.value = -25; // Keep it subtle
+
+            // Sound for a correct decision
+            synths.correct = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+            }).toDestination();
+            synths.correct.volume.value = -12;
+
+            // Sound for an incorrect decision
+            synths.incorrect = new Tone.FMSynth({
+                harmonicity: 1.5, modulationIndex: 10, oscillator: { type: "sine" },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 },
+                modulation: { type: "square" },
+                modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.8 }
+            }).toDestination();
+            synths.incorrect.volume.value = -8;
+            
+             // Sound for loading a new scenario
+            synths.load = new Tone.Synth({
+                oscillator: { type: 'sine' },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.1 }
+            }).toDestination();
+            synths.load.volume.value = -18;
+            
+            // Sound for completing the simulation
+            synths.complete = new Tone.PluckSynth({
+                attackNoise: 1, dampening: 4000, resonance: 0.7
+            }).toDestination();
+
+            soundsInitialized = true;
+        }
+
+        // --- Core Application Logic ---
+
         function typeWriter(element, text, speed, callback) {
             let i = 0;
             element.innerHTML = '';
@@ -381,6 +467,7 @@
             
             function type() {
                 if (i < text.length) {
+                    if (soundsInitialized && text.charAt(i) !== ' ') synths.type.triggerAttackRelease('C7', '32n');
                     element.innerHTML += text.charAt(i);
                     i++;
                     setTimeout(type, speed);
@@ -436,6 +523,7 @@
         }
 
         function loadScenario(index) {
+            if (soundsInitialized) synths.load.triggerAttackRelease('G5', '16n');
             missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
             if (index >= scenarios.length) {
                 showFinalScreen();
@@ -469,6 +557,7 @@
         }
         
         function handleDecision(choice) {
+            if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
             const s = scenarios[currentScenarioIndex];
             const isCorrect = (choice === s.correctChoice);
 
@@ -480,6 +569,7 @@
             explanationP.style.whiteSpace = 'pre-wrap';
 
             if (isCorrect) {
+                if (soundsInitialized) synths.correct.triggerAttackRelease(['C4', 'E4', 'G4'], '8n');
                 missionControlUI.classList.add('decision-correct');
                 resultTitle.className += ' text-green-400';
                 explanationP.className += ' text-slate-200';
@@ -487,6 +577,7 @@
                     typeWriter(explanationP, s.explanation, 20);
                 });
             } else {
+                 if (soundsInitialized) synths.incorrect.triggerAttackRelease('C3', '0.8');
                 missionControlUI.classList.add('decision-incorrect');
                 resultTitle.className += ' text-white';
                 explanationP.className += ' text-white';
@@ -502,6 +593,7 @@
             nextButton.innerText = 'NEXT MISSION BRIEFING';
             nextButton.className = 'next-button decision-button mt-6 w-full bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
             nextButton.onclick = () => {
+                if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
                 currentScenarioIndex++;
                 loadScenario(currentScenarioIndex);
             };
@@ -513,6 +605,7 @@
         }
 
         function showFinalScreen() {
+             if (soundsInitialized) synths.complete.triggerAttackRelease("C5", "4n", Tone.now() + 0.5);
              missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
              missionTitleEl.textContent = "All Missions Completed";
 
@@ -532,6 +625,7 @@
              restartButton.innerText = 'RESTART SIMULATION';
              restartButton.className = 'restart-button decision-button mt-6 w-full bg-amber-600/80 hover:bg-amber-500 border-amber-400 text-white font-orbitron rounded-md shadow-lg animate-fade-in';
              restartButton.onclick = () => {
+                 if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
                  currentScenarioIndex = 0;
                  loadScenario(currentScenarioIndex);
              };
@@ -539,10 +633,22 @@
              decisionPanelEl.appendChild(restartButton);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadScenario(currentScenarioIndex);
+        // --- Event Listener to start the simulation ---
+        startSimButton.addEventListener('click', async () => {
+            await Tone.start();
+            initSounds();
+            synths.click.triggerAttackRelease('C3', '8n');
+            
+            startScreen.classList.add('animate-fade-out');
+            startScreen.addEventListener('animationend', () => {
+                startScreen.style.display = 'none';
+                missionControlWrapper.style.display = 'flex';
+                missionControlWrapper.classList.add('animate-fade-in');
+                loadScenario(currentScenarioIndex);
+            }, { once: true });
         });
     </script>
 </body>
 </html>
+
 
