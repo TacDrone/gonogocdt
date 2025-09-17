@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ศูนย์บัญชาการภารกิจโดรน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a; /* bg-slate-900 */
+            overflow-y: auto; /* Allow scrolling */
+            transition: background-color 0.5s ease-in-out;
+            color: #e2e8f0; /* slate-200 */
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .panel {
+            background-color: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        .decision-button {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .decision-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        .live-indicator::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #f87171;
+            margin-right: 10px;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .explanation-text {
+            white-space: pre-wrap;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .animate-fade-in { animation: fadeIn 0.7s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-text-focus-in {
+            animation: text-focus-in 0.8s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+        }
+        @keyframes text-focus-in {
+          0% { filter: blur(12px); opacity: 0; }
+          100% { filter: blur(0px); opacity: 1; }
+        }
+
+        /* State styles */
+        .decision-correct .panel {
+            border-color: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+        .decision-correct .header-text { color: #4ade80; }
+        
+        @keyframes flash-red-animation {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            border-color: #ef4444;
+          }
+          50% {
+            box-shadow: 0 0 40px rgba(255, 0, 0, 1);
+            border-color: #ff7575;
+          }
+        }
+        
+        .decision-incorrect .panel {
+            animation: flash-red-animation 0.8s infinite;
+        }
+        .decision-incorrect .header-text { color: #f87171; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="mission-control-ui" class="w-full max-w-screen-2xl mx-auto pb-20">
+        <header class="text-center mb-8">
+            <h1 class="text-5xl md:text-6xl font-orbitron font-bold text-sky-300 tracking-widest header-text">MISSION CONTROL</h1>
+            <p class="text-sky-500 text-lg mt-1">Presented by Department of Physics | CRMA</p>
+            <p id="mission-title" class="text-cyan-400 mt-2 text-2xl"></p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Briefing Panel -->
+            <div id="briefing-panel" class="panel rounded-lg p-8 flex flex-col">
+                <h2 class="text-3xl font-orbitron text-amber-300 border-b-2 border-amber-300/50 pb-3 mb-5">MISSION BRIEFING</h2>
+                <div id="briefing-content" class="space-y-6 text-xl flex-grow"></div>
+            </div>
+
+            <!-- Main Display -->
+            <div id="main-display" class="panel rounded-lg p-8 flex flex-col">
+                <div class="flex justify-between items-center border-b-2 border-sky-300/50 pb-3 mb-5">
+                    <h2 class="text-3xl font-orbitron text-sky-300 header-text">LIVE FEED</h2>
+                    <span class="live-indicator font-orbitron text-red-400 text-lg">LIVE</span>
+                </div>
+                <div id="live-feed-content" class="flex-grow bg-black/50 rounded p-6 text-xl min-h-[300px] overflow-y-auto">
+                    <p class="font-mono">Awaiting pilot decision...</p>
+                </div>
+                <div id="decision-panel" class="mt-8">
+                    <h3 class="text-center text-2xl font-orbitron text-white mb-5">Awaiting Command</h3>
+                    <div class="flex justify-around gap-6">
+                        <button id="go-button" class="decision-button w-full bg-green-600/80 hover:bg-green-500 border-green-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg">
+                            ปล่อยยาน (GO)
+                        </button>
+                        <button id="no-go-button" class="decision-button w-full bg-red-600/80 hover:bg-red-500 border-red-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg">
+                            ยกเลิกภารกิจ (NO-GO)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center z-10 bg-slate-900">
+        <p class="text-xs text-slate-600">&copy; 2025 Department of Physics | CRMA. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Audio Elements -->
+    <audio id="audio-ambient" loop src="https://cdn.pixabay.com/audio/2022/10/13/audio_790183e29c.mp3"></audio>
+    <audio id="audio-typing" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c816397354.mp3"></audio>
+    <audio id="audio-click" src="https://cdn.pixabay.com/audio/2022/03/15/audio_28b1b22880.mp3"></audio>
+    <audio id="audio-correct" src="https://cdn.pixabay.com/audio/2022/03/10/audio_2c8422312a.mp3"></audio>
+    <audio id="audio-incorrect" src="https://cdn.pixabay.com/audio/2022/03/10/audio_9da562a9b3.mp3"></audio>
+
+    <script>
+        const scenarios = [
+            // โจทย์สุดขั้ว 1
+            {
+                title: 'ภารกิจที่ 1: สำรวจพื้นที่การเกษตรยามเช้า',
+                objective: 'บินสำรวจแปลงผักออร์แกนิกเพื่อประเมินการเจริญเติบโตด้วยกล้อง Multispectral',
+                urgency: 'ต้องการข้อมูลก่อนการเก็บเกี่ยวในสัปดาห์หน้า',
+                weather: { temp: '25°C', wind: 'ลมสงบ 5 กม./ชม. (ระดับ 1)', sighting: 'ทัศนวิสัยดีเยี่ยม ท้องฟ้าโปร่ง', taf_code: 'TAF VTBD 130900Z 1310/1322 00000KT 9999 SKC', taf_explanation: '(TAF ระบุว่าลมสงบ ทัศนวิสัย 10 กม.+ และท้องฟ้าโปร่ง)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! สภาพอากาศในอุดมคติ (Ideal Condition) อุณหภูมิ 25°C ทำให้ความหนาแน่นอากาศดี (Low Density Altitude) ส่งผลให้ใบพัดสร้างแรงยกได้เต็มที่ มอเตอร์ไม่ทำงานหนักเกินไป ประกอบกับลมสงบและทัศนวิสัยโปร่งใส (Excellent VLOS) จึงเป็นสภาวะที่ปลอดภัยและเหมาะสมที่สุดสำหรับการบิน'
+            },
+            // โจทย์สุดขั้ว 2
+            {
+                title: 'ภารกิจที่ 2: ตรวจสอบเสาสัญญาณบนภูเขา',
+                objective: 'บินตรวจสอบสภาพเสาส่งสัญญาณโทรศัพท์บนยอดเขา',
+                urgency: 'สัญญาณในพื้นที่นั้นขัดข้อง ต้องการหาสาเหตุ',
+                weather: { temp: '26°C (ที่พื้น)', wind: 'ลมพัดขึ้นเขา (Anabatic) 15 กม./ชม. (ระดับ 3)', sighting: 'ทัศนวิสัยดีมาก มองเห็นยอดเขาชัดเจน', taf_code: 'TAF VTXX 150500Z 1506/1606 22008KT 9999 FEW030', taf_explanation: '(TAF ระบุลมทิศตะวันตกเฉียงใต้ 8 นอต (ประมาณ 15 กม./ชม.) ทัศนวิสัยดี มีเมฆเล็กน้อยที่ 3,000 ฟุต)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! ลมพัดขึ้นเขา (Anabatic Wind) ในช่วงกลางวันเป็นเรื่องปกติ และความเร็ว 15 กม./ชม. อยู่ในเกณฑ์ที่โดรนส่วนใหญ่รับมือได้ นักบินต้องตระหนักว่า Density Altitude จะเพิ่มขึ้นตามความสูงจริง ซึ่งจะลดประสิทธิภาพอากาศยานเล็กน้อย แต่ในสภาพอากาศโปร่งและอุณหภูมิไม่สูงเกินไปนี้ สามารถชดเชยกำลังมอเตอร์และทำการบินได้อย่างปลอดภัย'
+            },
+            // โจทย์สุดขั้ว 3
+            {
+                title: 'ภารกิจที่ 3: ถ่ายทอดสดการแข่งขันเรือใบ',
+                objective: 'บินโดรนถ่ายทอดสดการแข่งขันเรือใบกลางทะเล',
+                urgency: 'เป็นรอบชิงชนะเลิศ มีผู้ชมรอชมทั่วประเทศ',
+                weather: { temp: '31°C', wind: 'ลมกระโชกแรง 30-45 กม./ชม. (ระดับ 5-6)', sighting: 'เมฆฝนฟ้าคะนอง (Cumulonimbus) เริ่มก่อตัวที่ขอบฟ้า', taf_code: 'TAF VTBS 151000Z 1511/1517 TEMPO 1511/1515 3000 TSRA SCT015CB', taf_explanation: '(TAF ระบุว่าอาจมีพายุฝนฟ้าคะนองและเมฆ Cumulonimbus เกิดขึ้นชั่วคราวในช่วงเวลาภารกิจ)' },
+                correctChoice: 'NO-GO',
+                explanation: 'การตัดสินใจถูกต้องที่สุด! พายุฝนฟ้าคะนอง (Thunderstorm - TSRA) คือสภาวะอากาศอันตรายร้ายแรงที่สุด (Hazardous Weather) ห้ามทำการบินเด็ดขาด แม้จะยังไม่เกิดในพื้นที่โดยตรง แต่การก่อตัวของเมฆ CB (Cumulonimbus) เป็นสัญญาณของกระแสลมรุนแรงทั้งแนวนอน (Gusts) และแนวดิ่ง (Updraft/Downdraft) รวมถึงความเสี่ยงจากฟ้าผ่า การฝืนบินเข้าไปคือการนำอากาศยานไปสู่การสูญเสียอย่างแน่นอน'
+            },
+            // โจทย์ก้ำกึ่ง 1
+            {
+                title: 'ภารกิจที่ 4: ทำแผนที่แนวชายฝั่ง',
+                objective: 'บินทำแผนที่ Orthomosaic แนวชายฝั่งทะเลเป็นระยะทาง 1 กม.',
+                urgency: 'กรมทรัพยากรทางทะเลต้องการข้อมูลภายในสัปดาห์นี้',
+                weather: { temp: '30°C', wind: 'ลมทะเลพัดคงที่ 20 กม./ชม. (ระดับ 4)', sighting: 'มีเมฆเล็กน้อย ทะเลมีคลื่นปานกลาง', taf_code: 'TAF VTPH 140300Z 1404/1416 24010KT 9999 SCT025', taf_explanation: '(TAF ระบุลมคงที่ 10 นอต (ประมาณ 18.5 กม./ชม.) ทัศนวิสัยดี)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! นี่คือสถานการณ์ที่ต้องใช้การวางแผน (Go, but with caution) ลมที่พัดต่อเนื่อง 20 กม./ชม. (ระดับ 4 โบฟอร์ต) จะทำให้แบตเตอรี่หมดเร็วกว่าปกติ แผนการบินที่ปลอดภัยคือนักบินต้องบิน "ทวนลม" (Headwind) ในขาออก และบิน "ตามลม" (Tailwind) ในขาเข้าเสมอ เพื่อให้แน่ใจว่ามีพลังงานเพียงพอสำหรับขากลับ และไม่เสี่ยงต่อการที่โดรนจะถูกพัดออกไปไกล'
+            },
+            // โจทย์ก้ำกึ่ง 2
+             {
+                title: 'ภารกิจที่ 5: ตรวจสอบท่อส่งน้ำมัน',
+                objective: 'บินตรวจสอบแนวท่อส่งน้ำมันในพื้นที่โล่งหลังมีฝนโปรย',
+                urgency: 'มีการแจ้งเตือนแรงดันตกเล็กน้อย ต้องตรวจสอบหารอยรั่วซึม',
+                weather: { temp: '27°C', wind: 'ลมสงบ (ระดับ 0)', sighting: 'มีฝนตกปรอยๆ (Drizzle) แต่ยังมองเห็นแนวท่อได้ชัดเจน', taf_code: 'TAF VTCC 150600Z 1507/1519 00000KT 8000 -RA BKN020', taf_explanation: '(TAF ระบุลมสงบ ทัศนวิสัย 8 กม. มีฝนเล็กน้อย (-RA) และเมฆมาก)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! ตามคู่มือปฏิบัติการของ ทบ. (รส.๑ - ๑๕๕) และมาตรฐานการบินทั่วไป การบินท่ามกลางฝนโปรย (ฝนละออง) สามารถทำได้ หากโดรนมีมาตรฐานกันน้ำ (IP Rating) เพียงพอ และที่สำคัญที่สุดคือผู้บังคับยังสามารถรักษาระยะการมองเห็นอากาศยาน (VLOS) ได้ตลอดเวลา ในสถานการณ์นี้ ทัศนวิสัยยังดีพอและลมสงบ จึงสามารถปฏิบัติภารกิจได้ด้วยความระมัดระวัง'
+            },
+            // โจทย์ก้ำกึ่ง 3
+            {
+                title: 'ภารกิจที่ 6: ประเมินความเสียหายหลังฝนหยุด',
+                objective: 'บินสำรวจหลังคาหมู่บ้านเพื่อประเมินความเสียหายหลังมีฝนตกหนักเมื่อคืน',
+                urgency: 'ลูกบ้านต้องการข้อมูลเพื่อเคลมประกัน',
+                weather: { temp: '28°C', wind: 'ลมเบา 10 กม./ชม. (ระดับ 2)', sighting: 'ท้องฟ้าเริ่มเปิด มีเมฆเป็นหย่อมๆ พื้นดินยังเปียก', taf_code: 'TAF VTBD 130200Z 1303/1315 22005KT 9000 SCT020 BECMG 1305/1307 9999 SKC', taf_explanation: '(TAF ระบุว่าระหว่าง 12:00-14:00 น. สภาพอากาศจะค่อยๆ ดีขึ้นเป็นท้องฟ้าโปร่ง)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! TAF ระบุว่า "BECMG" (Becoming) เป็นสัญญาณบวก หมายถึงอากาศกำลังจะดีขึ้นอย่างถาวรในช่วงเวลาที่กำหนด การบินในช่วงเวลานี้จึงมีความเสี่ยงต่ำและเป็น "หน้าต่างแห่งโอกาส" (Window of Opportunity) ที่ดีที่สุดในการปฏิบัติภารกิจให้สำเร็จก่อนที่สภาพอากาศจะเปลี่ยนแปลงอีกครั้งในรอบวัน'
+            },
+            // โจทย์สุดขั้ว 4
+            {
+                title: 'ภารกิจที่ 7: สำรวจยอดดอยในฤดูหนาว',
+                objective: 'บินเก็บภาพมุมสูงของทะเลหมอกบนยอดดอยอินทนนท์',
+                urgency: 'เป็นช่วงปรากฏการณ์แม่คะนิ้ง (น้ำค้างแข็ง) ที่หาชมได้ยาก',
+                weather: { temp: '8°C', wind: 'ลมเบา (ระดับ 1)', sighting: 'อากาศหนาวจัด แบตเตอรี่ที่เตรียมมาไม่ได้อุ่นไว้ก่อน', taf_code: 'TAF VTCC 012200Z 0200/0212 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศดี ลมสงบ ท้องฟ้าโปร่ง)' },
+                correctChoice: 'NO-GO',
+                explanation: 'การตัดสินใจถูกต้อง! อุณหภูมิต่ำกว่า 15°C เป็นอันตรายอย่างยิ่งต่อแบตเตอรี่ LiPo ปฏิกิริยาเคมีภายในจะช้าลง ทำให้แรงดันไฟตกวูบ (Critical Voltage Drop) กะทันหันได้ แม้แอปจะยังแสดง % แบตเตอรี่สูงอยู่ก็ตาม การฝืนบินโดยไม่วอร์มแบตเตอรี่ให้อยู่ในอุณหภูมิทำงานที่เหมาะสม (ประมาณ 20-25°C) มีความเสี่ยงสูงที่โดรนจะดับกลางอากาศ'
+            },
+            // โจทย์ยาก 1
+            {
+                title: 'ภารกิจที่ 8: ถ่ายทำสารคดีสัตว์ป่ากลางคืน',
+                objective: 'ใช้โดรน Thermal บินตามหาฝูงช้างป่าในพื้นที่อุทยานเปิด',
+                urgency: 'ทีมงานมีคิวถ่ายทำแค่คืนนี้คืนเดียว',
+                weather: { temp: '23°C', wind: 'ลมสงบสนิท (ระดับ 0)', sighting: 'ท้องฟ้าไร้เมฆ ดาวชัด รู้สึกได้ถึงความชื้นใกล้พื้นดิน', taf_code: 'TAF VTXX 151800Z 1519/1607 00000KT 9999 SKC PROB30 1522/1601 3000 BR', taf_explanation: '(TAF ระบุว่ามีโอกาส 30% ที่จะเกิดหมอกน้ำค้าง (Mist) ทำให้ทัศนวิสัยลดลงเหลือ 3 กม. หลังเวลาตี 5)' },
+                correctChoice: 'NO-GO',
+                explanation: 'การตัดสินใจถูกต้อง! นี่คือกับดักของนักบิน สภาวะ "ท้องฟ้าโปร่ง ลมสงบ" ในตอนกลางคืน เป็นเงื่อนไขสำคัญของการเกิด "หมอกแผ่รังสี" (Radiation Fog) เมื่อพื้นดินคายความร้อนอย่างรวดเร็ว อากาศใกล้พื้นจะเย็นลงจนถึง "จุดน้ำค้าง" (Dew Point) ทำให้ไอน้ำควบแน่นเป็นหมอกหนาทึบอย่างฉับพลัน TAF ที่พยากรณ์ว่ามีโอกาสเกิดหมอกยิ่งเป็นสัญญาณเตือนที่ชัดเจน การบินในสภาวะนี้เสี่ยงต่อการสูญเสีย VLOS อย่างสิ้นเชิง'
+            },
+             // โจทย์สุดขั้ว 5
+            {
+                title: 'ภารกิจที่ 9: ส่งเวชภัณฑ์ฉุกเฉินข้ามหุบเขา',
+                objective: 'บินส่งกล่องเวชภัณฑ์ข้ามหุบเขาไปยังหมู่บ้านที่ถูกตัดขาด',
+                urgency: 'มีผู้ป่วยต้องการยาด่วน',
+                weather: { temp: '28°C', wind: 'ลมที่พื้นค่อนข้างนิ่ง (ระดับ 0-1)', sighting: 'เห็นเมฆลอยผ่านช่องเขาอย่างรวดเร็วและผิดปกติ', taf_code: 'TAF VTBD 150500Z 1506/1606 27007KT 9999 FEW020', taf_explanation: '(TAF รายงานลมผิวพื้นปกติ แต่ไม่สามารถพยากรณ์ลมเฉพาะจุดที่สันเขาได้)' },
+                correctChoice: 'NO-GO',
+                explanation: 'การตัดสินใจถูกต้อง! การสังเกตเห็นเมฆเคลื่อนตัวเร็วผิดปกติในบริเวณช่องเขา เป็นสัญญาณอันตรายของ "ลมเฉือน" (Wind Shear) ซึ่งคือการเปลี่ยนแปลงทิศทางหรือความเร็วลมอย่างฉับพลันในระยะทางสั้นๆ TAF ไม่สามารถพยากรณ์ปรากฏการณ์ระดับจุลภาค (Microscale) เช่นนี้ได้ การบินเข้าไปในเขตลมเฉือนอาจทำให้โดรนสูญเสียแรงยกและพลิกคว่ำจนตกได้ทันที'
+            },
+            // โจทย์ยาก 2
+            {
+                title: 'ภารกิจที่ 10: ตรวจสอบแนวสายไฟช่วงบ่าย',
+                objective: 'บินตรวจสอบแนวสายไฟฟ้าแรงสูงหลังมีรายงานขัดข้อง',
+                urgency: 'ต้องรีบหาจุดที่เสียหายเพื่อส่งทีมซ่อมบำรุง',
+                weather: { temp: '32°C', wind: 'ลม 10 กม./ชม. (ระดับ 2)', sighting: 'มีเมฆก่อตัวเล็กน้อย พื้นดินแห้ง', taf_code: 'TAF VTCC 150500Z 1506/1606 22010KT 9999 SCT020 TEMPO 1506/1509 4000 SHRA', taf_explanation: '(TAF ระบุว่าระหว่าง 13:00-16:00 อาจมีฝนโปรยเป็นครั้งคราว ทัศนวิสัยลดเหลือ 4 กม.)' },
+                correctChoice: 'GO',
+                explanation: 'การตัดสินใจถูกต้อง! นี่คือโจทย์วัดประสบการณ์ TAF ระบุว่า "TEMPO" หมายถึงสภาพอากาศเลวร้าย (ฝนโปรย) จะเกิดขึ้นเป็นช่วงๆ แต่ "ไม่ได้เกิดขึ้นตลอดเวลา" และรวมกันแล้วไม่เกินครึ่งหนึ่งของระยะเวลาพยากรณ์ นี่คือ "หน้าต่างแห่งโอกาส" ที่นักบินมืออาชีพจะใช้เครื่องมือเสริม เช่น แอปพลิเคชันเรดาร์ฝนแบบเรียลไทม์ เพื่อเฝ้าระวังและรอให้กลุ่มฝนผ่านไปก่อน แล้วจึงขึ้นบินปฏิบัติภารกิจในช่วงที่ท้องฟ้าเปิด'
+            }
+        ];
+
+        let currentScenarioIndex = 0;
+        
+        const missionControlUI = document.getElementById('mission-control-ui');
+        const missionTitleEl = document.getElementById('mission-title');
+        const briefingContentEl = document.getElementById('briefing-content');
+        const liveFeedContentEl = document.getElementById('live-feed-content');
+        const decisionPanelEl = document.getElementById('decision-panel');
+        
+        // Audio Elements
+        const audioAmbient = document.getElementById('audio-ambient');
+        const audioTyping = document.getElementById('audio-typing');
+        const audioClick = document.getElementById('audio-click');
+        const audioCorrect = document.getElementById('audio-correct');
+        const audioIncorrect = document.getElementById('audio-incorrect');
+
+        let audioStarted = false;
+
+        function playSound(soundElement, loop = false) {
+            if (audioStarted && soundElement) {
+                soundElement.currentTime = 0;
+                soundElement.loop = loop;
+                soundElement.play().catch(e => console.error(`Audio play failed: ${e.message}`));
+            }
+        }
+        
+        function stopSound(soundElement) {
+            if (soundElement) {
+                soundElement.pause();
+                soundElement.currentTime = 0;
+            }
+        }
+        
+        document.body.addEventListener('click', () => {
+            if (!audioStarted) {
+                audioAmbient.volume = 0.05;
+                playSound(audioAmbient, true);
+                audioStarted = true;
+            }
+        }, { once: true });
+
+
+        function typeText(container, s, callback) {
+            briefingContentEl.innerHTML = ''; // Clear previous content
+            
+            let delay = 0;
+            const content = [
+                {
+                    title: 'OBJECTIVE:',
+                    text: s.objective,
+                    color: 'text-amber-400',
+                },
+                {
+                    title: 'URGENCY:',
+                    text: `"${s.urgency}"`,
+                    color: 'text-amber-300',
+                    italic: true
+                },
+                {
+                    title: 'WEATHER DATA:',
+                    text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`,
+                    color: 'text-cyan-400',
+                },
+                {
+                    title: 'TAF (Terminal Aerodrome Forecast):',
+                    text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`,
+                    color: 'text-cyan-400',
+                    isCode: true
+                }
+            ];
+            
+            playSound(audioTyping, true);
+
+            content.forEach((item, index) => {
+                setTimeout(() => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'animate-text-focus-in';
+                    
+                    const titleEl = document.createElement('h3');
+                    titleEl.className = `font-bold ${item.color}`;
+                    titleEl.textContent = item.title;
+                    
+                    const textEl = document.createElement(item.isCode ? 'pre' : 'p');
+                    if(item.isCode) {
+                        textEl.className = 'bg-black/50 p-2 rounded-md font-mono text-lg'
+                    } else {
+                        textEl.className = `text-slate-300 pl-4 ${item.italic ? 'italic' : ''}`;
+                    }
+                    textEl.style.whiteSpace = 'pre-wrap';
+                    textEl.textContent = item.text;
+
+                    wrapper.appendChild(titleEl);
+                    wrapper.appendChild(textEl);
+                    briefingContentEl.appendChild(wrapper);
+
+                    if(index === content.length -1) {
+                        stopSound(audioTyping);
+                        if(callback) callback();
+                    }
+                }, delay);
+                delay += 800;
+            });
+        }
+
+        function loadScenario(index) {
+            missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
+            if (index >= scenarios.length) {
+                showFinalScreen();
+                return;
+            }
+
+            const s = scenarios[index];
+            
+            missionTitleEl.textContent = s.title;
+            
+            typeText(briefingContentEl, s, () => {
+                decisionPanelEl.style.visibility = 'visible';
+                decisionPanelEl.classList.add('animate-fade-in');
+            });
+            
+            liveFeedContentEl.innerHTML = '<p class="font-mono animate-text-focus-in">Awaiting pilot decision...</p>';
+            decisionPanelEl.style.visibility = 'hidden';
+            decisionPanelEl.innerHTML = `
+                 <h3 class="text-center text-2xl font-orbitron text-white mb-5">Awaiting Command</h3>
+                    <div class="flex justify-around gap-6">
+                        <button id="go-button" class="decision-button w-full bg-green-600/80 hover:bg-green-500 border-green-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg">
+                            ปล่อยยาน (GO)
+                        </button>
+                        <button id="no-go-button" class="decision-button w-full bg-red-600/80 hover:bg-red-500 border-red-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg">
+                            ยกเลิกภารกิจ (NO-GO)
+                        </button>
+                    </div>
+            `;
+            
+            document.getElementById('go-button').addEventListener('click', () => handleDecision('GO'));
+            document.getElementById('no-go-button').addEventListener('click', () => handleDecision('NO-GO'));
+        }
+        
+        function handleDecision(choice) {
+            playSound(audioClick);
+            const s = scenarios[currentScenarioIndex];
+            const isCorrect = (choice === s.correctChoice);
+
+            liveFeedContentEl.innerHTML = ''; // Clear previous text
+            
+            const resultTitle = document.createElement('h3');
+            resultTitle.className = 'font-orbitron mb-3 text-2xl animate-text-focus-in';
+
+            const explanationP = document.createElement('p');
+            explanationP.className = 'explanation-text';
+             
+
+            if (isCorrect) {
+                playSound(audioCorrect);
+                missionControlUI.classList.add('decision-correct');
+                resultTitle.className += ' text-green-400';
+                resultTitle.textContent = 'การตัดสินใจถูกต้อง (CORRECT DECISION)';
+                explanationP.className += ' text-slate-200';
+            } else {
+                playSound(audioIncorrect);
+                missionControlUI.classList.add('decision-incorrect');
+                resultTitle.className += ' text-red-400';
+                resultTitle.textContent = 'การตัดสินใจผิดพลาด (INCORRECT DECISION)';
+                explanationP.className += ' text-red-300';
+            }
+            
+            explanationP.textContent = s.explanation;
+            liveFeedContentEl.appendChild(resultTitle);
+            liveFeedContentEl.appendChild(explanationP);
+            
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'NEXT MISSION BRIEFING';
+            nextButton.className = 'decision-button mt-8 w-full bg-blue-600/80 hover:bg-blue-500 border-blue-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg animate-fade-in';
+            nextButton.onclick = () => {
+                playSound(audioClick);
+                currentScenarioIndex++;
+                loadScenario(currentScenarioIndex);
+            };
+            
+            decisionPanelEl.innerHTML = '';
+            decisionPanelEl.appendChild(nextButton);
+        }
+
+        function showFinalScreen() {
+             playSound(audioCorrect);
+             missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
+             missionTitleEl.textContent = "All Missions Completed";
+             briefingContentEl.innerHTML = '<p class="text-2xl animate-text-focus-in">All assigned tasks for this session have been concluded. Well done, Commander.</p>';
+             liveFeedContentEl.innerHTML = '<p class="font-mono text-2xl text-sky-400 animate-text-focus-in">System Standby. Awaiting new directives.</p>';
+             
+             const restartButton = document.createElement('button');
+             restartButton.innerText = 'RESTART SIMULATION';
+             restartButton.className = 'decision-button mt-8 w-full bg-amber-600/80 hover:bg-amber-500 border-amber-400 text-white font-orbitron text-3xl py-5 px-8 rounded-md shadow-lg animate-fade-in';
+             restartButton.onclick = () => {
+                 playSound(audioClick);
+                 currentScenarioIndex = 0;
+                 loadScenario(currentScenarioIndex);
+             };
+             decisionPanelEl.innerHTML = '';
+             decisionPanelEl.appendChild(restartButton);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadScenario(currentScenarioIndex);
+        });
+    </script>
+</body>
+</html>
+
