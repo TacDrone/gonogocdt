@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- This file is self-contained and ready for deployment on static hosting services like GitHub Pages. -->
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -114,7 +115,7 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         /* Animation Keyframes */
-        .animate-fade-in { animation: fadeIn 0.7s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.7s ease-in-out forwards; }
         .animate-fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(1.5vw); }
@@ -213,7 +214,7 @@
 
 
         /* Responsive Font Sizes */
-        h1 { font-size: 4.5vw; }
+        h1 { font-size: 5.85vw; }
         h2 { font-size: 2.2vw; }
         h3 { font-size: 1.6vw; }
         p, li, code, span, button { font-size: 1.4vw; }
@@ -224,7 +225,7 @@
         #briefing-content { font-size: 1.4vw; }
         
         @media (min-aspect-ratio: 16/9) {
-            h1 { font-size: 7.5vh; }
+            h1 { font-size: 9.75vh; }
             h2 { font-size: 3.8vh; }
             h3 { font-size: 2.8vh; }
             p, li, code, span, button { font-size: 2.5vh; }
@@ -233,6 +234,52 @@
             #go-button, #no-go-button, .next-button, .restart-button, #start-sim-button { font-size: 3.8vh; padding: 1.8vh; }
             #live-feed-content { font-size: 2.7vh; }
             #briefing-content { font-size: 2.5vh; }
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 1024px), (max-aspect-ratio: 1/1) {
+            html, body {
+                overflow: auto; /* Allow scrolling on mobile */
+            }
+            body::before {
+                background-size: 10vw 10vw;
+            }
+            #aspect-ratio-container {
+                position: static;
+                width: 100%;
+                height: auto;
+                min-height: 100%;
+                max-height: none;
+                max-width: none;
+            }
+            #mission-control-wrapper {
+                position: static;
+                height: auto;
+                min-height: 100vh;
+                padding: 5vw;
+            }
+            main.grid {
+                display: flex;
+                flex-direction: column;
+            }
+             /* Adjust font sizes for mobile */
+            h1 { font-size: 8vw; }
+            h2 { font-size: 5.5vw; }
+            h3 { font-size: 4.5vw; }
+            p, li, code, span, button { font-size: 3.8vw; }
+            .panel { padding: 4vw; }
+            footer p { font-size: 3vw; }
+
+            /* Use rem for key elements for better accessibility */
+            #briefing-content, #live-feed-content { font-size: 1rem; }
+            p, .weather-item span { font-size: 0.95rem; }
+            pre { font-size: 0.9rem; }
+            .decision-button { font-size: 1.1rem; }
+
+            #mission-title { font-size: 1.2rem; }
+            #decision-panel h3 { font-size: 1.1rem; }
+            #start-sim-button, .next-button, .restart-button { font-size: 1.25rem; padding: 0.8rem; }
+            .text-2xl { font-size: 1.15rem; }
         }
         
     </style>
@@ -257,6 +304,7 @@
                     <h1 class="font-orbitron font-black text-slate-800 tracking-wider">MISSION CONTROL</h1>
                     <p class="text-slate-600 mt-1">Presented by Department of Physics | CRMA</p>
                     <p id="mission-title" class="text-sky-700 mt-1 font-semibold"></p>
+                    <p id="mission-counter" class="font-orbitron text-slate-500 text-lg mt-1"></p>
                 </header>
 
                 <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow">
@@ -297,168 +345,89 @@
     </div>
     
     <script>
-        // The JavaScript logic remains the same as it's robust and works well.
-        // I'm only modifying the HTML and CSS for the visual theme change.
         const scenarios = [
-             {
-                title: 'ภารกิจที่ 1: สำรวจพื้นที่การเกษตร',
-                objective: 'ใช้โดรนเกษตร 6 ใบพัด (Hexacopter) บินสำรวจแปลงผักออร์แกนิกเพื่อประเมินการเจริญเติบโตด้วยกล้อง Multispectral',
+            // --- EASY SCENARIOS (3) ---
+            {
+                title: 'ภารกิจที่ 1: สำรวจพื้นที่การเกษตร (ง่าย)',
+                objective: 'ใช้โดรนเกษตร 6 ใบพัด (Hexacopter) บินสำรวจแปลงผักออร์แกนิกเพื่อประเมินการเจริญเติบโต',
                 urgency: 'ต้องการข้อมูลก่อนการเก็บเกี่ยวในสัปดาห์หน้า',
                 weather: { temp: '25°C', wind: 'ลมสงบ 5 กม./ชม. (ระดับ 1)', sighting: 'ทัศนวิสัยดีเยี่ยม ท้องฟ้าโปร่ง', taf_code: 'TAF VTBD 130900Z 1310/1322 00000KT 9999 SKC', taf_explanation: '(TAF ระบุว่าลมสงบ ทัศนวิสัย 10 กม.+ และท้องฟ้าโปร่ง)' },
                 correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สภาพอากาศในอุดมคติ:** อุณหภูมิ 25°C ทำให้ความหนาแน่นอากาศดี (Low Density Altitude) ส่งผลให้ใบพัดทั้ง 6 ของ Hexacopter สร้างแรงยกได้เต็มที่\n* **สภาวะปลอดภัยสูงสุด:** ลมสงบและทัศนวิสัยโปร่งใส (Excellent VLOS) เป็นเงื่อนไขที่ดีที่สุดสำหรับการบิน'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สภาพอากาศในอุดมคติ:** ลมสงบและทัศนวิสัยโปร่งใส เป็นเงื่อนไขที่ดีที่สุดสำหรับการบินโดรนสำรวจ'
             },
             {
-                title: 'ภารกิจที่ 2: ตรวจสอบเสาสัญญาณ',
+                title: 'ภารกิจที่ 2: ตรวจสอบเสาสัญญาณ (ง่าย)',
                 objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินตรวจสอบสภาพเสาส่งสัญญาณโทรศัพท์บนยอดเขา',
                 urgency: 'สัญญาณในพื้นที่นั้นขัดข้อง ต้องการหาสาเหตุ',
-                weather: { temp: '26°C (ที่พื้น)', wind: 'ลมพัดขึ้นเขา (Anabatic) 15 กม./ชม. (ระดับ 3)', sighting: 'ทัศนวิสัยดีมาก มองเห็นยอดเขาชัดเจน', taf_code: 'TAF VTXX 150500Z 1506/1606 22008KT 9999 FEW030', taf_explanation: '(TAF ระบุลมทิศตะวันตกเฉียงใต้ 8 นอต (ประมาณ 15 กม./ชม.) ทัศนวิสัยดี มีเมฆเล็กน้อยที่ 3,000 ฟุต)' },
+                weather: { temp: '26°C (ที่พื้น)', wind: 'ลมพัดขึ้นเขา 15 กม./ชม. (ระดับ 3)', sighting: 'ทัศนวิสัยดีมาก มองเห็นยอดเขาชัดเจน', taf_code: 'TAF VTXX 150500Z 1506/1606 22008KT 9999 FEW030', taf_explanation: '(TAF ระบุลมทิศตะวันตกเฉียงใต้ 8 นอต (ประมาณ 15 กม./ชม.) ทัศนวิสัยดี)' },
                 correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ลมที่จัดการได้:** ลมพัดขึ้นเขา (Anabatic Wind) ความเร็ว 15 กม./ชม. อยู่ในเกณฑ์ที่โดรน 4 ใบพัดส่วนใหญ่รับมือได้\n* **คำแนะนำ:** ควรเผื่อพลังงานแบตเตอรี่ไว้มากกว่าปกติ เนื่องจาก Density Altitude จะเพิ่มขึ้นตามความสูงจริง ซึ่งจะทำให้มอเตอร์ทำงานหนักขึ้น'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ลมที่จัดการได้:** ลมความเร็ว 15 กม./ชม. อยู่ในเกณฑ์ที่โดรน 4 ใบพัดส่วนใหญ่รับมือได้\n* **คำแนะนำ:** ควรเผื่อพลังงานแบตเตอรี่ไว้มากกว่าปกติ เนื่องจากความสูงจะทำให้มอเตอร์ทำงานหนักขึ้น'
             },
             {
-                title: 'ภารกิจที่ 3: ถ่ายทอดสดทางทะเล',
-                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) สำหรับงานถ่ายทอดสด บินติดตามการแข่งขันเรือใบกลางทะเล',
-                urgency: 'เป็นรอบชิงชนะเลิศ มีผู้ชมรอชมทั่วประเทศ',
-                weather: { temp: '31°C', wind: 'ลมกระโชกแรง 30-45 กม./ชม. (ระดับ 5-6)', sighting: 'เมฆฝนฟ้าคะนอง (Cumulonimbus) เริ่มก่อตัวที่ขอบฟ้า', taf_code: 'TAF VTBS 151000Z 1511/1517 TEMPO 1511/1515 3000 TSRA SCT015CB', taf_explanation: '(TAF ระบุว่าอาจมีพายุฝนฟ้าคะนองและเมฆ Cumulonimbus เกิดขึ้นชั่วคราวในช่วงเวลาภารกิจ)' },
-                correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้องที่สุด!\n\n* **สภาวะอากาศอันตรายร้ายแรง:** ห้ามทำการบินเด็ดขาดเมื่อมีพายุฝนฟ้าคะนอง (Thunderstorm) และเมฆ Cumulonimbus (CB)\n* **ไม่มีข้อยกเว้น:** ความเสี่ยงจากกระแสลมรุนแรงและฟ้าผ่าสูงเกินกว่าจะยอมรับได้ ไม่ว่าภารกิจจะเร่งด่วนเพียงใด'
-            },
-            {
-                title: 'ภารกิจที่ 4: ทำแผนที่ชายฝั่ง',
-                objective: 'ใช้โดรนสำรวจ 4 ใบพัด (Mapping Quadcopter) บินทำแผนที่ Orthomosaic แนวชายฝั่งทะเล',
-                urgency: 'กรมทรัพยากรทางทะเลต้องการข้อมูลภายในสัปดาห์นี้',
-                weather: { temp: '30°C', wind: 'ลมทะเลพัดคงที่ 20 กม./ชม. (ระดับ 4)', sighting: 'มีเมฆเล็กน้อย ทะเลมีคลื่นปานกลาง', taf_code: 'TAF VTPH 140300Z 1404/1416 24010KT 9999 SCT025', taf_explanation: '(TAF ระบุลมคงที่ 10 นอต (ประมาณ 18.5 กม./ชม.) ทัศนวิสัยดี)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง! (แต่ต้องวางแผนอย่างรอบคอบ)\n\n* **ผลกระทบจากลม:** ลมต่อเนื่อง 20 กม./ชม. จะทำให้แบตเตอรี่ของโดรน multi-rotor หมดเร็วกว่าปกติ\n* **แผนการบินที่ปลอดภัย:** ต้องบิน "ทวนลม" (Headwind) ในขาออก และ "ตามลม" (Tailwind) ในขากลับเสมอ เพื่อให้แน่ใจว่ามีพลังงานเพียงพอ'
-            },
-             {
-                title: 'ภารกิจที่ 5: ตรวจสอบท่อส่งน้ำมัน',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินตรวจสอบแนวท่อส่งน้ำมันในพื้นที่โล่งหลังมีฝนโปรย',
-                urgency: 'มีการแจ้งเตือนแรงดันตกเล็กน้อย ต้องตรวจสอบหารอยรั่วซึม',
-                weather: { temp: '27°C', wind: 'ลมสงบ (ระดับ 0)', sighting: 'มีฝนตกปรอยๆ (Drizzle) แต่ยังมองเห็นแนวท่อได้ชัดเจน', taf_code: 'TAF VTCC 150600Z 1507/1519 00000KT 8000 -RA BKN020', taf_explanation: '(TAF ระบุลมสงบ ทัศนวิสัย 8 กม. มีฝนเล็กน้อย (-RA) และเมฆมาก)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง! (แต่มีเงื่อนไข)\n\n* **บินในฝนโปรย:** สามารถทำได้หากโดรน multi-rotor มีมาตรฐานกันน้ำ (IP Rating) เพียงพอเท่านั้น\n* **การรักษาระยะมองเห็น (VLOS):** เป็นปัจจัยสำคัญที่สุด หากฝนเริ่มตกหนักขึ้นจนบดบังทัศนวิสัย ต้องนำเครื่องลงทันที'
-            },
-            {
-                title: 'ภารกิจที่ 6: ประเมินความเสียหาย',
+                title: 'ภารกิจที่ 3: ประเมินความเสียหาย (ง่าย)',
                 objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินสำรวจหลังคาหมู่บ้านเพื่อประเมินความเสียหายหลังมีฝนตกหนักเมื่อคืน',
                 urgency: 'ลูกบ้านต้องการข้อมูลเพื่อเคลมประกัน',
-                weather: { temp: '28°C', wind: 'ลมเบา 10 กม./ชม. (ระดับ 2)', sighting: 'ท้องฟ้าเริ่มเปิด มีเมฆเป็นหย่อมๆ พื้นดินยังเปียก', taf_code: 'TAF VTBD 130200Z 1303/1315 22005KT 9000 SCT020 BECMG 1305/1307 9999 SKC', taf_explanation: '(TAF ระบุว่าระหว่าง 12:00-14:00 น. สภาพอากาศจะค่อยๆ ดีขึ้นเป็นท้องฟ้าโปร่ง)' },
+                weather: { temp: '28°C', wind: 'ลมเบา 10 กม./ชม. (ระดับ 2)', sighting: 'ท้องฟ้าเริ่มเปิด มีเมฆเป็นหย่อมๆ', taf_code: 'TAF VTBD 130200Z 1303/1315 22005KT 9000 SCT020 BECMG 1305/1307 9999 SKC', taf_explanation: '(TAF ระบุว่าระหว่าง 12:00-14:00 น. สภาพอากาศจะค่อยๆ ดีขึ้นเป็นท้องฟ้าโปร่ง)' },
                 correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สัญญาณบวกจาก TAF:** คำว่า "BECMG" (Becoming) บ่งชี้ว่าอากาศกำลังจะดีขึ้นอย่างถาวร\n* **หน้าต่างแห่งโอกาส:** เป็นช่วงเวลาที่ดีที่สุดในการปฏิบัติภารกิจให้สำเร็จก่อนที่สภาพอากาศจะเปลี่ยนแปลงอีกครั้ง'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สัญญาณบวกจาก TAF:** คำว่า "BECMG" (Becoming) บ่งชี้ว่าอากาศกำลังจะดีขึ้นอย่างถาวร ซึ่งเป็นช่วงเวลาที่ดีที่สุดในการปฏิบัติภารกิจ'
+            },
+
+            // --- HARD SCENARIOS (7) ---
+            {
+                title: 'ภารกิจที่ 4: ถ่ายทอดสดทางทะเล (ยาก)',
+                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) สำหรับงานถ่ายทอดสด บินติดตามการแข่งขันเรือใบกลางทะเล',
+                urgency: 'เป็นรอบชิงชนะเลิศ มีผู้ชมรอชมทั่วประเทศ',
+                weather: { temp: '31°C', wind: 'ลมกระโชกแรง 30-45 กม./ชม. (ระดับ 5-6)', sighting: 'เมฆฝนฟ้าคะนอง (Cumulonimbus) เริ่มก่อตัวที่ขอบฟ้า', taf_code: 'TAF VTBS 151000Z 1511/1517 TEMPO 1511/1515 3000 TSRA SCT015CB', taf_explanation: '(TAF ระบุว่าอาจมีพายุฝนฟ้าคะนองและเมฆ Cumulonimbus เกิดขึ้นชั่วคราว)' },
+                correctChoice: 'NO-GO',
+                explanation: 'การตัดสินใจถูกต้องที่สุด!\n\n* **สภาวะอากาศอันตรายร้ายแรง:** ห้ามทำการบินเด็ดขาดเมื่อมีพายุฝนฟ้าคะนอง (Thunderstorm) และเมฆ Cumulonimbus (CB) ความเสี่ยงจากลมรุนแรงและฟ้าผ่าสูงเกินกว่าจะยอมรับได้'
             },
             {
-                title: 'ภารกิจที่ 7: ถ่ายภาพทะเลหมอก',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินเก็บภาพมุมสูงของทะเลหมอกบนยอดดอยอินทนนท์',
+                title: 'ภารกิจที่ 5: ถ่ายภาพทะเลหมอก (ยาก)',
+                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินเก็บภาพมุมสูงของทะเลหมอกบนยอดดอย',
                 urgency: 'เป็นช่วงปรากฏการณ์แม่คะนิ้ง (น้ำค้างแข็ง) ที่หาชมได้ยาก',
-                weather: { temp: '8°C', wind: 'ลมเบา (ระดับ 1)', sighting: 'อากาศหนาวจัด แบตเตอรี่ที่เตรียมมาไม่ได้อุ่นไว้ก่อน', taf_code: 'TAF VTCC 012200Z 0200/0212 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศดี ลมสงบ ท้องฟ้าโปร่ง)' },
+                weather: { temp: '8°C', wind: 'ลมเบา (ระดับ 1)', sighting: 'อากาศหนาวจัด แบตเตอรี่ที่เตรียมมาไม่ได้อุ่นไว้ก่อน', taf_code: 'TAF VTCC 012200Z 0200/0212 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศดี ลมสงบ)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **อันตรายจากอุณหภูมิต่ำ:** อุณหภูมิต่ำกว่า 15°C เป็นอันตรายต่อแบตเตอรี่ LiPo อาจทำให้แรงดันไฟตกวูบ (Voltage Drop) กะทันหัน\n* **คำแนะนำ:** หากจำเป็นต้องบิน นักบิน *ต้อง* อุ่นแบตเตอรี่ให้ได้อุณหภูมิ 20-25°C ก่อนขึ้นบิน และควรนำเครื่องลงจอดเมื่อแบตเตอรี่เหลือสูงกว่าปกติ (เช่น 30-40%) เพื่อความปลอดภัย'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **อันตรายจากอุณหภูมิต่ำ:** อุณหภูมิต่ำกว่า 15°C เป็นอันตรายต่อแบตเตอรี่ LiPo อาจทำให้แรงดันไฟตกวูบ (Voltage Drop) กะทันหัน\n* **คำแนะนำ:** หากจำเป็นต้องบิน นักบิน *ต้อง* อุ่นแบตเตอรี่ให้ได้อุณหภูมิ 20-25°C ก่อนขึ้นบินเสมอ'
             },
             {
-                title: 'ภารกิจที่ 8: ถ่ายทำสารคดีสัตว์ป่า',
-                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) ที่ติดตั้งกล้อง Thermal บินตามหาฝูงช้างป่าในพื้นที่อุทยานเปิด',
+                title: 'ภารกิจที่ 6: ถ่ายทำสารคดีสัตว์ป่า (ยาก)',
+                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) ที่ติดตั้งกล้อง Thermal บินตามหาฝูงช้างป่าในตอนกลางคืน',
                 urgency: 'ทีมงานมีคิวถ่ายทำแค่คืนนี้คืนเดียว',
-                weather: { temp: '23°C', wind: 'ลมสงบสนิท (ระดับ 0)', sighting: 'ท้องฟ้าไร้เมฆ ดาวชัด รู้สึกได้ถึงความชื้นใกล้พื้นดิน', taf_code: 'TAF VTXX 151800Z 1519/1607 00000KT 9999 SKC PROB30 1522/1601 3000 BR', taf_explanation: '(TAF ระบุว่ามีโอกาส 30% ที่จะเกิดหมอกน้ำค้าง (Mist) ทำให้ทัศนวิสัยลดลงเหลือ 3 กม. หลังเวลาตี 5)' },
+                weather: { temp: '23°C', wind: 'ลมสงบสนิท (ระดับ 0)', sighting: 'ท้องฟ้าไร้เมฆ ดาวชัด รู้สึกได้ถึงความชื้นใกล้พื้นดิน', taf_code: 'TAF VTXX 151800Z 1519/1607 00000KT 9999 SKC PROB30 1522/1601 3000 BR', taf_explanation: '(TAF ระบุว่ามีโอกาส 30% ที่จะเกิดหมอกน้ำค้าง (Mist) หลังเวลาตี 5)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **กับดักของนักบิน:** สภาวะ "ท้องฟ้าโปร่ง ลมสงบ" ในตอนกลางคืน เป็นเงื่อนไขสำคัญของการเกิด "หมอกแผ่รังสี" (Radiation Fog)\n* **ความเสี่ยงสูง:** หมอกสามารถก่อตัวหนาทึบอย่างฉับพลัน ทำให้เสี่ยงต่อการสูญเสียการมองเห็น (VLOS) อย่างสิ้นเชิง ควรยกเลิกภารกิจ'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **กับดักของนักบิน:** สภาวะ "ท้องฟ้าโปร่ง ลมสงบ" ในตอนกลางคืน เป็นเงื่อนไขสำคัญของการเกิด "หมอกแผ่รังสี" (Radiation Fog) ซึ่งสามารถก่อตัวหนาทึบอย่างฉับพลัน ทำให้เสี่ยงต่อการสูญเสียการมองเห็น (VLOS)'
             },
             {
-                title: 'ภารกิจที่ 9: ขนส่งเวชภัณฑ์ฉุกเฉิน',
-                objective: 'ใช้โดรน 6 ใบพัดสำหรับขนส่ง (Delivery Hexacopter) บินส่งกล่องเวชภัณฑ์ข้ามหุบเขาไปยังหมู่บ้านที่ถูกตัดขาด',
+                title: 'ภารกิจที่ 7: ขนส่งเวชภัณฑ์ฉุกเฉิน (ยาก)',
+                objective: 'ใช้โดรน 6 ใบพัดสำหรับขนส่ง บินส่งกล่องเวชภัณฑ์ข้ามหุบเขาไปยังหมู่บ้านที่ถูกตัดขาด',
                 urgency: 'มีผู้ป่วยต้องการยาด่วน',
-                weather: { temp: '28°C', wind: 'ลมที่พื้นค่อนข้างนิ่ง (ระดับ 0-1)', sighting: 'เห็นเมฆลอยผ่านช่องเขาอย่างรวดเร็วและผิดปกติ', taf_code: 'TAF VTBD 150500Z 1506/1606 27007KT 9999 FEW020', taf_explanation: '(TAF รายงานลมผิวพื้นปกติ แต่ไม่สามารถพยากรณ์ลมเฉพาะจุดที่สันเขาได้)' },
+                weather: { temp: '28°C', wind: 'ลมที่พื้นค่อนข้างนิ่ง', sighting: 'เห็นเมฆลอยผ่านช่องเขาอย่างรวดเร็วและผิดปกติ', taf_code: 'TAF VTBD 150500Z 1506/1606 27007KT 9999 FEW020', taf_explanation: '(TAF รายงานลมผิวพื้นปกติ แต่ไม่สามารถพยากรณ์ลมเฉพาะจุดที่สันเขาได้)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สัญญาณอันตราย:** เมฆเคลื่อนตัวเร็วผิดปกติในบริเวณช่องเขา เป็นสัญญาณของ "ลมเฉือน" (Wind Shear) ที่คาดเดาไม่ได้\n* **ความเสี่ยงต่อการควบคุม:** การบินเข้าไปในเขตลมเฉือนอาจทำให้โดรน multi-rotor สูญเสียการทรงตัวและตกได้ทันที ไม่ควรเสี่ยง'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สัญญาณอันตราย:** เมฆเคลื่อนตัวเร็วผิดปกติในบริเวณช่องเขา เป็นสัญญาณของ "ลมเฉือน" (Wind Shear) ที่คาดเดาไม่ได้ การบินเข้าไปอาจทำให้โดรนสูญเสียการทรงตัวและตกได้ทันที'
             },
             {
-                title: 'ภารกิจที่ 10: ตรวจสอบสายไฟฟ้าแรงสูง',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินตรวจสอบแนวสายไฟฟ้าแรงสูงหลังมีรายงานขัดข้อง',
-                urgency: 'ต้องรีบหาจุดที่เสียหายเพื่อส่งทีมซ่อมบำรุง',
-                weather: { temp: '32°C', wind: 'ลม 10 กม./ชม. (ระดับ 2)', sighting: 'มีเมฆก่อตัวเล็กน้อย พื้นดินแห้ง', taf_code: 'TAF VTCC 150500Z 1506/1606 22010KT 9999 SCT020 TEMPO 1506/1509 4000 SHRA', taf_explanation: '(TAF ระบุว่าระหว่าง 13:00-16:00 อาจมีฝนโปรยเป็นครั้งคราว ทัศนวิสัยลดเหลือ 4 กม.)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ความเข้าใจใน TAF:** คำว่า "TEMPO" หมายถึงสภาพอากาศเลวร้ายจะเกิดขึ้นเป็นช่วงๆ แต่ "ไม่ได้เกิดขึ้นตลอดเวลา"\n* **คำแนะนำ:** ควรใช้แอปพลิเคชันเรดาร์ฝนแบบเรียลไทม์ เพื่อเฝ้าระวังและรอให้กลุ่มฝนผ่านไปก่อน แล้วจึงขึ้นบินในช่วงที่ท้องฟ้าเปิด'
-            },
-            {
-                title: 'ภารกิจที่ 11: ตรวจสอบเขื่อน',
+                title: 'ภารกิจที่ 8: ตรวจสอบเขื่อน (ยาก)',
                 objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) บินตรวจสอบรอยร้าวบนสันเขื่อนคอนกรีต',
                 urgency: 'รายงานการตรวจสอบความปลอดภัยประจำปี',
                 weather: { temp: '29°C', wind: 'ลมกระโชกแรงในช่องเขา 40 กม./ชม. (ระดับ 5)', sighting: 'ทัศนวิสัยดีเยี่ยม', taf_code: 'TAF VTXX 160400Z 1605/1617 24008KT 9999 SKC', taf_explanation: '(TAF รายงานลมทั่วไปปกติ แต่ไม่สามารถพยากรณ์ลมเฉพาะจุดในหุบเขาได้)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ปรากฏการณ์ Venturi Effect:** ลมที่พัดผ่านช่องเขามีความเร็วสูงขึ้นอย่างมากและคาดเดายาก\n* **คำแนะนำ:** ภารกิจนี้อาจเป็นไปได้หากใช้โดรนที่มีความสามารถในการต้านลมสูง (Wind Resistance Level 7+) และบินด้วยความระมัดระวังสูงสุด โดยเริ่มจากการบินทดสอบที่ขอบของหุบเขาก่อนเข้าพื้นที่ปฏิบัติการจริง'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ปรากฏการณ์ Venturi Effect:** ลมที่พัดผ่านช่องเขามีความเร็วสูงขึ้นอย่างมากและคาดเดายาก อาจเป็นอันตรายต่อโดรนที่ไม่ทนลม'
             },
             {
-                title: 'ภารกิจที่ 12: ค้นหาและช่วยเหลือ',
-                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) พร้อมกล้องความร้อนและไฟส่องสว่าง ค้นหาผู้สูญหายในอุทยานแห่งชาติ',
-                urgency: 'ผู้สูญหายขาดการติดต่อเกิน 12 ชั่วโมง อุณหภูมิตอนกลางคืนลดต่ำลง',
-                weather: { temp: '16°C', wind: 'ลมสงบ (ระดับ 0)', sighting: 'ท้องฟ้าเปิด มีความชื้นสูง แบตเตอรี่สำรองอุ่นไว้พร้อมใช้งาน', taf_code: 'TAF VTCC 171300Z 1714/1802 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศจะโปร่งตลอดคืน)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **การเตรียมความพร้อม:** การวอร์มแบตเตอรี่ (Pre-heating) จะช่วยลดความเสี่ยงจากอากาศเย็นได้\n* **ความเสถยร:** โดรน 6 ใบพัดมีความเสถียรและ отказоустойчивость (redundancy) สูง เหมาะสำหรับภารกิจสำคัญเช่นนี้'
-            },
-            {
-                title: 'ภารกิจที่ 13: ถ่ายทำภาพยนตร์',
+                title: 'ภารกิจที่ 9: ถ่ายทำภาพยนตร์ (ยาก)',
                 objective: 'ใช้โดรนถ่ายทำภาพยนตร์ 8 ใบพัด (Octocopter) ถ่ายทำฉากไล่ล่าทางอากาศใกล้สนามบิน',
                 urgency: 'กำหนดการถ่ายทำเร่งด่วน ต้องถ่ายให้เสร็จภายในวันนี้',
                 weather: { temp: '28°C', wind: 'ลมเบา 5 กม./ชม. (ระดับ 1)', sighting: 'ทัศนวิสัยสมบูรณ์แบบ', taf_code: 'TAF VTBS 180300Z 1804/1904 18005KT 9999 FEW025', taf_explanation: '(TAF ยืนยันว่าสภาพอากาศดีเยี่ยม)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้องที่สุด!\n\n* **เขตควบคุมการบิน:** พื้นที่ใกล้สนามบิน (ในระยะ 9 กม.) เป็นเขตควบคุมการบิน (Controlled Airspace)\n* **กฎหมายและความปลอดภัย:** การบินในพื้นที่นี้โดยไม่ได้รับอนุญาตและไม่มีการประสานงานกับ ATC ถือว่าผิดกฎหมายร้ายแรง ไม่ว่าอากาศจะดีแค่ไหนก็ตาม'
+                explanation: 'การตัดสินใจถูกต้องที่สุด!\n\n* **เขตควบคุมการบิน:** พื้นที่ใกล้สนามบินเป็นเขตควบคุมการบิน (Controlled Airspace) การบินในพื้นที่นี้โดยไม่ได้รับอนุญาตและไม่มีการประสานงานกับหอบังคับการบิน ถือว่าผิดกฎหมายร้ายแรง ไม่ว่าอากาศจะดีแค่ไหนก็ตาม'
             },
-            {
-                title: 'ภารกิจที่ 14: พ่นสารเคมี',
-                objective: 'ใช้โดรนเกษตร 8 ใบพัด (Agricultural Octocopter) พ่นยาฆ่าแมลงและปุ๋ยทางใบในสวนทุเรียน',
-                urgency: 'ถึงรอบการพ่นยาตามกำหนดเพื่อป้องกันโรคระบาด',
-                weather: { temp: '30°C', wind: 'ลมพัดไม่แน่นอน 5-10 กม./ชม. (ระดับ 1-2)', sighting: 'มีแดดจัด', taf_code: 'TAF VTBW 190100Z 1902/1914 VRB03KT 9999 SKC', taf_explanation: '(TAF ระบุว่าลมมีทิศทางไม่แน่นอน (VRB - Variable) ความเร็วประมาณ 3 นอต)' },
-                correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ความเสี่ยงจากการฟุ้งกระจาย:** TAF ที่ระบุ "VRB" (Variable) จะทำให้ Downwash จากใบพัดทั้ง 8 ไม่สามารถกดสารเคมีลงบนเป้าหมายได้อย่างมีประสิทธิภาพ และเกิดการฟุ้งกระจาย (Chemical Drift)\n* **คำแนะนำ:** ควรเลื่อนภารกิจไปในช่วงเช้าตรู่หรือช่วงเย็นที่ลมสงบสนิท เพื่อให้การพ่นสารเคมีมีประสิทธิภาพสูงสุดและปลอดภัยต่อพื้นที่ข้างเคียง'
-            },
-            {
-                title: 'ภารกิจที่ 15: ตรวจสอบใต้สะพาน',
-                objective: 'ใช้โดรน 4 ใบพัดขนาดเล็ก (Mini Quadcopter) บินตรวจสอบโครงสร้างใต้สะพานข้ามแม่น้ำเจ้าพระยา',
-                urgency: 'พบสัญญาณการสั่นสะเทือนผิดปกติ ต้องตรวจสอบโดยด่วน',
-                weather: { temp: '29°C', wind: 'ลมสงบ', sighting: 'ท้องฟ้ามีเมฆมาก เริ่มมีฝนตกปรอยๆ สัญญาณ GPS ขาดหายเป็นช่วงๆ', taf_code: 'TAF VTBD 200700Z 2008/2020 00000KT 8000 -RA BKN015', taf_explanation: '(TAF ระบุลมสงบ แต่มีฝนเล็กน้อย)' },
-                correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ความเสี่ยงซ้ำซ้อน:** การสูญเสียสัญญาณ GPS ใต้สะพาน ทำให้โดรนต้องบินในโหมด ATTI ซึ่งควบคุมยาก บวกกับสภาพฝนที่รบกวนเซ็นเซอร์ ทำให้เสี่ยงเกินไป\n* **คำแนะนำ:** ภารกิจนี้จะปลอดภัยขึ้นมากหากรอให้ฝนหยุดสนิท และใช้นักบินที่มีประสบการณ์สูงในการบินโหมด ATTI โดยมีผู้ช่วยสังตการณ์ (Visual Observer) เพิ่มอีกหนึ่งคน'
-            },
-            {
-                title: 'ภารกิจที่ 16: ตรวจสอบโซลาร์ฟาร์ม',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) พร้อมกล้องความร้อน บินตรวจสอบหาจุดบกพร่อง (Hotspot) บนแผงโซลาร์เซลล์',
-                urgency: 'ประสิทธิภาพการผลิตไฟฟ้าของโรงงานลดลง',
-                weather: { temp: '35°C', wind: 'ลมเบา 8 กม./ชม. (ระดับ 2)', sighting: 'แดดจัด มีฝุ่นควัน (Haze) เล็กน้อย', taf_code: 'TAF VTBD 210600Z 2107/2119 22005KT 7000 HZ FEW025', taf_explanation: '(TAF ระบุลมเบา ทัศนวิสัย 7 กม. เนื่องจากฝุ่นควัน)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **สภาวะการทำงานปกติ:** แม้อุณหภูมิ 35°C จะทำให้ Density Altitude สูงขึ้นและมอเตอร์ร้อนเร็ว แต่ก็ยังอยู่ในขีดความสามารถของโดรน\n* **คำแนะนำ:** ควรแบ่งการบินออกเป็นไฟลท์สั้นๆ เพื่อให้มอเตอร์ทั้ง 4 ตัวได้พักระบายความร้อน และควรนำเครื่องลงจอดหากมีคำเตือนเรื่องอุณหภูมิสูง'
-            },
-            {
-                title: 'ภารกิจที่ 17: สำรวจพื้นที่ก่อสร้าง',
-                objective: 'ใช้โดรนสำรวจ 4 ใบพัด (Mapping Quadcopter) ทำแผนที่ความคืบหน้าของโครงการก่อสร้างขนาดใหญ่หลังพายุฝุ่น',
-                urgency: 'ต้องการข้อมูลสำหรับรายงานการประชุมผู้บริหาร',
-                weather: { temp: '32°C', wind: 'ลมสงบลงแล้ว แต่ยังมีฝุ่นละเอียดลอยในอากาศ', sighting: 'ทัศนวิสัยประมาณ 5 กม. เพราะฝุ่น', taf_code: 'TAF VTXX 220900Z 2210/2222 00000KT 5000 DU', taf_explanation: '(TAF ระบุลมสงบ ทัศนวิสัย 5 กม. เนื่องจากฝุ่น (DU - Dust))' },
-                correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **อันตรายจากฝุ่น:** ฝุ่นละอองที่มีฤทธิ์กัดกร่อน (Abrasive dust) สามารถเข้าไปในมอเตอร์แบบ Brushless ของโดรน multi-rotor ทำให้เกิดการสึกหรอและเสียหาย\n* **คำแนะนำ:** หากจำเป็นต้องบินอย่างเร่งด่วน ควรใช้โดรนที่มีมาตรฐานการป้องกันฝุ่น (IP5X) และต้องทำความสะอาดมอเตอร์และตัวเครื่องอย่างละเอียดหลังจบภารกิจเพื่อลดความเสียหายระยะยาว'
-            },
-            {
-                title: 'ภารกิจที่ 18: ถ่ายทอดสดมาราธอน',
-                objective: 'ใช้โดรน 6 ใบพัด (Hexacopter) บินติดตามผู้นำการแข่งขันวิ่งมาราธอนในเมือง',
-                urgency: 'รายการถ่ายทอดสดระดับประเทศ',
-                weather: { temp: '28°C', wind: 'ลมสงบ แต่มีลมกระโชกแรงเป็นช่วงๆ', sighting: 'ท้องฟ้าแจ่มใส', taf_code: 'TAF VTBS 230000Z 2301/2401 00000KT 9999 SKC TEMPO 2302/2305 27020G35KT', taf_explanation: '(TAF ระบุว่าระหว่าง 9-12 โมงเช้า อาจมีลมกระโชกแรง 20 นอต (37 กม./ชม.) เป็นครั้งคราว)' },
-                correctChoice: 'GO',
-                explanation: 'การตัดสินใจถูกต้อง! (แต่ต้องวางแผนอย่างรอบคอบ)\n\n* **การประเมินความเสี่ยง:** แม้จะมีลมกระโชกแรงเป็นครั้งคราว แต่โดรน 6 ใบพัดมีความเสถียรสูงพอที่จะรับมือได้ในระยะสั้นๆ\n* **การปฏิบัติ:** นักบินต้องเตรียมพร้อมที่จะนำเครื่องลงจอดเพื่อรอให้ลมสงบ หรือบินในระดับความสูงที่เหมาะสมเพื่อหลีกเลี่ยงลม'
-            },
-            {
-                title: 'ภารกิจที่ 19: สำรวจนกในป่าชายเลน',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) นับจำนวนประชากรนกในป่าชายเลนช่วงน้ำลง',
-                urgency: 'โครงการวิจัยสิ่งแวดล้อม ต้องการข้อมูลตามฤดูกาล',
-                weather: { temp: '27°C', wind: 'ลมสงบ แต่หมอกทะเลเริ่มเคลื่อนตัวเข้าหาฝั่ง', sighting: 'ทัศนวิสัยเริ่มลดลง', taf_code: 'TAF VTPH 241000Z 2411/2417 00000KT 8000 PROB40 2412/2415 0800 FG', taf_explanation: '(TAF ระบุว่ามีโอกาส 40% ที่จะเกิดหมอก (FG) หนาจัด ทัศนวิสัยลดลงเหลือ 800 เมตร)' },
-                correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **อันตรายจากหมอกทะเล:** หมอกทะเล (Sea Fog) สามารถเคลื่อนตัวเข้ามาปกคลุมพื้นที่ได้อย่างรวดเร็วมาก\n* **ความเสี่ยงสูญเสีย VLOS:** การพยากรณ์ที่มีโอกาสเกิดหมอกถึง 40% (PROB40) ถือเป็นความเสี่ยงสูงที่จะสูญเสียการมองเห็นและอากาศยาน ควรยกเลิกภารกิจ'
-            },
-            {
-                title: 'ภารกิจที่ 20: ถ่ายภาพตลาดนัดกลางคืน',
-                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) ถ่ายภาพและวิดีโอมุมสูงของตลาดนัดกลางคืนเพื่อโปรโมทการท่องเที่ยว',
+             {
+                title: 'ภารกิจที่ 10: ถ่ายภาพตลาดนัดกลางคืน (ยาก)',
+                objective: 'ใช้โดรน 4 ใบพัด (Quadcopter) ถ่ายภาพมุมสูงของตลาดนัดกลางคืนเพื่อโปรโมทการท่องเที่ยว',
                 urgency: 'ลูกค้าต้องการภาพสำหรับแคมเปญโฆษณา',
                 weather: { temp: '28°C', wind: 'ลมสงบ', sighting: 'อากาศดี พบเห็นโดรนของผู้ที่ไม่เกี่ยวข้องบินอยู่ในบริเวณใกล้เคียงหลายลำ', taf_code: 'TAF VTBD 251200Z 2513/2601 00000KT 9999 SKC', taf_explanation: '(TAF ยืนยันว่าอากาศดี)' },
                 correctChoice: 'NO-GO',
-                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ความปลอดภัยสาธารณะ:** การบินเหนือฝูงชนมีความเสี่ยงสูงและมักจะผิดกฎหมายหากไม่ได้รับอนุญาต\n* **ความเสี่ยงการชนกลางอากาศ:** การมีโดรนลำอื่นที่ไม่มีการประสานงานบินอยู่ในพื้นที่เดียวกัน สร้างความเสี่ยงสูงที่จะเกิดอุบัติเหตุ ควรยกเลิกภารกิจเพื่อความปลอดภัย'
+                explanation: 'การตัดสินใจถูกต้อง!\n\n* **ความปลอดภัยสาธารณะ:** การบินเหนือฝูงชนมีความเสี่ยงสูงและมักจะผิดกฎหมายหากไม่ได้รับอนุญาต\n* **ความเสี่ยงการชนกลางอากาศ:** การมีโดรนลำอื่นที่ไม่มีการประสานงานบินอยู่ในพื้นที่เดียวกัน สร้างความเสี่ยงสูงที่จะเกิดอุบัติเหตุ ควรยกเลิกภารกิจ'
             }
         ];
 
@@ -553,83 +522,6 @@
             }
             type();
         }
-
-        function showBriefing(s, callback) {
-            briefingContentEl.innerHTML = ''; 
-            
-            const contentStructure = [
-                { title: 'OBJECTIVE:', text: s.objective, color: 'text-orange-700' },
-                { title: 'URGENCY:', text: `"${s.urgency}"`, color: 'text-orange-600', italic: true },
-                { title: 'WEATHER DATA:', text: `\n- Temp: ${s.weather.temp}\n- Wind: ${s.weather.wind}\n- Visual: ${s.weather.sighting}`, color: 'text-sky-700' },
-                { title: 'TAF (Terminal Aerodrome Forecast):', text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`, color: 'text-sky-700', isCode: true }
-            ];
-            
-            let currentItemIndex = 0;
-            
-            function showNextItem() {
-                if (currentItemIndex >= contentStructure.length) {
-                    if (callback) callback();
-                    return;
-                }
-                const item = contentStructure[currentItemIndex];
-                const wrapper = document.createElement('div');
-                wrapper.className = 'animate-fade-in';
-                
-                const titleEl = document.createElement('h3');
-                titleEl.className = `font-bold ${item.color}`;
-                
-                const textEl = document.createElement(item.isCode ? 'pre' : 'p');
-                textEl.className = item.isCode ? 'bg-slate-200/50 p-2 rounded-md font-mono text-slate-700 text-lg' : `text-slate-700 pl-4 ${item.italic ? 'italic' : ''}`;
-                textEl.style.whiteSpace = 'pre-wrap';
-                
-                wrapper.appendChild(titleEl);
-                wrapper.appendChild(textEl);
-                briefingContentEl.appendChild(wrapper);
-
-                typeWriter(titleEl, item.title, 30, { callback: () => {
-                     typeWriter(textEl, item.text, 10, { callback: () => {
-                        currentItemIndex++;
-                        setTimeout(showNextItem, 300);
-                     }});
-                }});
-            }
-
-            showNextItem();
-        }
-
-        function loadScenario(index) {
-            if (soundsInitialized) synths.load.triggerAttackRelease('G5', '16n');
-            missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
-            if (index >= scenarios.length) {
-                showFinalScreen();
-                return;
-            }
-
-            const s = scenarios[index];
-            missionTitleEl.textContent = s.title;
-            
-            showBriefing(s, () => {
-                decisionPanelEl.style.visibility = 'visible';
-                decisionPanelEl.classList.add('animate-fade-in');
-            });
-            
-            liveFeedContentEl.innerHTML = '<p class="font-mono animate-text-focus-in">Awaiting pilot decision...</p>';
-            decisionPanelEl.style.visibility = 'hidden';
-            decisionPanelEl.innerHTML = `
-                 <h3 class="text-center font-orbitron text-slate-800 mb-3 font-semibold">Awaiting Command</h3>
-                    <div class="flex justify-around gap-4">
-                        <button id="go-button" class="decision-button w-full bg-green-500 hover:bg-green-400 text-white font-orbitron rounded-lg shadow-lg">
-                            GO
-                        </button>
-                        <button id="no-go-button" class="decision-button w-full bg-red-500 hover:bg-red-400 text-white font-orbitron rounded-lg shadow-lg">
-                            NO GO
-                        </button>
-                    </div>
-            `;
-            
-            document.getElementById('go-button').addEventListener('click', () => handleDecision('GO'));
-            document.getElementById('no-go-button').addEventListener('click', () => handleDecision('NO-GO'));
-        }
         
         function handleDecision(choice) {
             if (soundsInitialized) synths.click.triggerAttackRelease('C2', '8n');
@@ -647,7 +539,7 @@
                 if (soundsInitialized) synths.correct.triggerAttackRelease(['C4', 'E4', 'G4'], '8n');
                 missionControlUI.classList.add('decision-correct');
                 resultTitle.className += ' text-green-400';
-                explanationP.className += ' text-slate-200';
+                explanationP.className = 'text-slate-200';
                 typeWriter(resultTitle, 'การตัดสินใจถูกต้อง (CORRECT DECISION)', 50, { callback: () => {
                     typeWriter(explanationP, s.explanation, 20, { playSound: false });
                 }});
@@ -655,7 +547,7 @@
                  if (soundsInitialized) synths.incorrect.start();
                 missionControlUI.classList.add('decision-incorrect');
                 resultTitle.className += ' text-red-400';
-                explanationP.className += ' text-slate-200';
+                explanationP.className = 'text-slate-200';
                  typeWriter(resultTitle, 'การตัดสินใจผิดพลาด (INCORRECT DECISION)', 50, { callback: () => {
                     typeWriter(explanationP, s.explanation, 20, { playSound: false });
                 }});
@@ -708,6 +600,125 @@
              decisionPanelEl.appendChild(restartButton);
         }
 
+        function showBriefing(s, callback) {
+            briefingContentEl.innerHTML = ''; 
+            
+            const contentStructure = [
+                { title: 'OBJECTIVE:', text: s.objective, color: 'text-orange-700' },
+                { title: 'URGENCY:', text: `"${s.urgency}"`, color: 'text-orange-600', italic: true },
+                { 
+                    title: 'WEATHER DATA:', 
+                    color: 'text-sky-700',
+                    isWeather: true,
+                    data: [
+                        { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block h-6 w-6 mr-2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>', label: 'Temp', value: s.weather.temp },
+                        { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block h-6 w-6 mr-2"><path d="M17.7 7.7a2.5 2.5 0 1 1-5 0"/><path d="M12 17.7a2.5 2.5 0 1 0-5 0"/><path d="M12 12.2a2.5 2.5 0 1 1 5 0"/><path d="m2 2 20 20"/><path d="M22 2 2 22"/></svg>', label: 'Wind', value: s.weather.wind },
+                        { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block h-6 w-6 mr-2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>', label: 'Visual', value: s.weather.sighting }
+                    ]
+                },
+                { title: 'TAF (Terminal Aerodrome Forecast):', text: `${s.weather.taf_code}\n${s.weather.taf_explanation}`, color: 'text-sky-700', isCode: true }
+            ];
+            
+            let currentItemIndex = 0;
+            
+            function showNextItem() {
+                if (currentItemIndex >= contentStructure.length) {
+                    if (callback) callback();
+                    return;
+                }
+                const item = contentStructure[currentItemIndex];
+                const wrapper = document.createElement('div');
+                wrapper.className = 'animate-fade-in mb-4';
+                
+                const titleEl = document.createElement('h3');
+                titleEl.className = `font-bold ${item.color}`;
+                
+                wrapper.appendChild(titleEl);
+
+                if(item.isWeather) {
+                    const weatherContainer = document.createElement('div');
+                    weatherContainer.className = 'pl-4 space-y-2';
+                    item.data.forEach(weatherItem => {
+                        const p = document.createElement('p');
+                        p.className = 'text-slate-700 flex items-center';
+                        p.innerHTML = `${weatherItem.icon} <strong class="w-16">${weatherItem.label}:</strong> <span class="flex-1">${weatherItem.value}</span>`;
+                        weatherContainer.appendChild(p);
+                    });
+                    wrapper.appendChild(weatherContainer);
+                    briefingContentEl.appendChild(wrapper);
+                     typeWriter(titleEl, item.title, 30, { callback: () => {
+                        currentItemIndex++;
+                        setTimeout(showNextItem, 300);
+                    }});
+
+                } else {
+                    const textEl = document.createElement(item.isCode ? 'pre' : 'p');
+                    textEl.className = item.isCode ? 'bg-slate-200/50 p-2 rounded-md font-mono text-slate-700 text-lg' : `text-slate-700 pl-4 ${item.italic ? 'italic' : ''}`;
+                    textEl.style.whiteSpace = 'pre-wrap';
+                    wrapper.appendChild(textEl);
+                    briefingContentEl.appendChild(wrapper);
+
+                    typeWriter(titleEl, item.title, 30, { callback: () => {
+                         typeWriter(textEl, item.text, 10, { callback: () => {
+                            currentItemIndex++;
+                            setTimeout(showNextItem, 300);
+                         }});
+                    }});
+                }
+            }
+
+            showNextItem();
+        }
+
+        function loadScenario(index) {
+            if (soundsInitialized) synths.load.triggerAttackRelease('G5', '16n');
+            const missionCounterEl = document.getElementById('mission-counter');
+            missionControlUI.classList.remove('decision-correct', 'decision-incorrect');
+            
+            if (index >= scenarios.length) {
+                missionCounterEl.textContent = `All Missions Completed`;
+                showFinalScreen();
+                return;
+            }
+            
+            missionCounterEl.textContent = `Mission ${index + 1} of ${scenarios.length}`;
+
+            const s = scenarios[index];
+            missionTitleEl.textContent = s.title;
+            
+            // CORRECTED LOGIC: Reset and hide the panel BEFORE showing the briefing.
+            decisionPanelEl.classList.remove('animate-fade-in');
+            decisionPanelEl.style.visibility = 'hidden';
+            
+            showBriefing(s, () => {
+                // This callback runs only AFTER the briefing is fully typed out.
+                // Now it's safe to make the panel visible again.
+                decisionPanelEl.style.visibility = 'visible';
+                // Force a reflow to ensure the browser recognizes the class addition as a new animation trigger
+                void decisionPanelEl.offsetWidth; 
+                decisionPanelEl.classList.add('animate-fade-in');
+            });
+            
+            // SIMPLIFIED LIVE FEED
+            liveFeedContentEl.innerHTML = '<p class="font-mono animate-text-focus-in">Awaiting pilot decision...</p>';
+
+            
+            decisionPanelEl.innerHTML = `
+                 <h3 class="text-center font-orbitron text-slate-800 mb-3 font-semibold">Awaiting Command</h3>
+                    <div class="flex justify-around gap-4">
+                        <button id="go-button" class="decision-button w-full bg-green-500 hover:bg-green-400 text-white font-orbitron rounded-lg shadow-lg">
+                            GO
+                        </button>
+                        <button id="no-go-button" class="decision-button w-full bg-red-500 hover:bg-red-400 text-white font-orbitron rounded-lg shadow-lg">
+                            NO GO
+                        </button>
+                    </div>
+            `;
+            
+            document.getElementById('go-button').addEventListener('click', () => handleDecision('GO'));
+            document.getElementById('no-go-button').addEventListener('click', () => handleDecision('NO-GO'));
+        }
+        
         // --- Event Listener to start the simulation ---
         startSimButton.addEventListener('click', async () => {
             await Tone.start();
@@ -725,3 +736,5 @@
     </script>
 </body>
 </html>
+
+
